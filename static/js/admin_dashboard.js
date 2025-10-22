@@ -222,11 +222,17 @@ function confirmDelete() {
 
 // Utility Functions
 function showLoading() {
-    document.getElementById('loadingOverlay').style.display = 'flex';
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'flex';
+    }
 }
 
 function hideLoading() {
-    document.getElementById('loadingOverlay').style.display = 'none';
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+    }
 }
 
 function getCSRFToken() {
@@ -294,7 +300,7 @@ function validateProductForm(data) {
 
 // Notification system
 function showNotification(message, type = 'info') {
-    // Create a simple notification if the vending.js notification system isn't available
+    // Create a simple notification
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;

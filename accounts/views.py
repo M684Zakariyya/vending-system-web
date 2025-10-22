@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 import json
 from django.http import JsonResponse
-from vm_app.models import Product, MoneyInsertion  # Import MoneyInsertion instead of Transaction
+from vm_app.models import Product, MoneyInsertion
 from django.db.models import Sum, Count, F
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -67,7 +67,7 @@ def admin_dashboard(request):
         # Calculate total sales for this product from PURCHASE transactions only
         product_sales = MoneyInsertion.objects.filter(
             products_purchased__icontains=product.name,
-            transaction_type='purchase'  # Only count purchases
+            transaction_type='purchase'
         ).aggregate(total_sales=Sum('total_expenses'))['total_sales'] or 0
         
         top_products.append({
@@ -79,7 +79,7 @@ def admin_dashboard(request):
     top_products = sorted(top_products, key=lambda x: x['total_sold'], reverse=True)[:5]
     
     # Recent transactions - show ALL transactions (purchases and withdrawals)
-    recent_transactions = MoneyInsertion.objects.all().order_by('-date', '-time')[:20]  # Limit to 20
+    recent_transactions = MoneyInsertion.objects.all().order_by('-date', '-time')[:20]
     
     # All products for management
     all_products_list = Product.objects.all().order_by('product_id')

@@ -1,664 +1,273 @@
-// Admin Dashboard JavaScript
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('Admin dashboard loaded');
-    initializeProductManagement();
-});
-
-function initializeProductManagement() {
-    console.log('Initializing product management...');
-    
-    // Add product form submission
-    const addProductForm = document.getElementById('addProductForm');
-    if (addProductForm) {
-        addProductForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            addNewProduct();
-        });
-    }
-
-    // Update product form submission
-    const updateProductForm = document.getElementById('updateProductForm');
-    if (updateProductForm) {
-        updateProductForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            updateExistingProduct();
-        });
-    }
-
-    // Delete product selection handler
-    const deleteProductSelect = document.getElementById('deleteProductSelect');
-    if (deleteProductSelect) {
-        deleteProductSelect.addEventListener('change', function () {
-            const warning = document.getElementById('deleteWarning');
-            const confirmBtn = document.querySelector('.confirm-delete-btn');
-
-            if (this.value) {
-                warning.style.display = 'block';
-                confirmBtn.style.display = 'block';
-            } else {
-                warning.style.display = 'none';
-                confirmBtn.style.display = 'none';
-            }
-        });
-    }
-}
-
-// Product Management Functions
-function showAddProduct() {
-    console.log('Showing add product modal');
-    document.getElementById('addProductModal').style.display = 'block';
-}
-
-function hideAddProduct() {
-    document.getElementById('addProductModal').style.display = 'none';
-    document.getElementById('addProductForm').reset();
-}
-
-function showUpdateProduct() {
-    console.log('Showing update product modal');
-    document.getElementById('updateProductModal').style.display = 'block';
-}
-
-function hideUpdateProduct() {
-    document.getElementById('updateProductModal').style.display = 'none';
-    document.getElementById('updateProductSelect').value = '';
-    document.getElementById('updateProductForm').style.display = 'none';
-    document.getElementById('updateProductForm').reset();
-}
-
-function showDeleteProduct() {
-    console.log('Showing delete product modal');
-    document.getElementById('deleteProductModal').style.display = 'block';
-}
-
-function hideDeleteProduct() {
-    document.getElementById('deleteProductModal').style.display = 'none';
-    document.getElementById('deleteProductSelect').value = '';
-    document.getElementById('deleteWarning').style.display = 'none';
-    document.querySelector('.confirm-delete-btn').style.display = 'none';
-}
-
-function loadProductData() {
-    const select = document.getElementById('updateProductSelect');
-    const selectedOption = select.options[select.selectedIndex];
-
-    if (selectedOption.value) {
-        document.getElementById('updateProductForm').style.display = 'block';
-        document.getElementById('updateProductId').value = selectedOption.value;
-        document.getElementById('updateProductName').value = selectedOption.getAttribute('data-name');
-        document.getElementById('updateProductPrice').value = selectedOption.getAttribute('data-price');
-        document.getElementById('updateProductStock').value = selectedOption.getAttribute('data-stock');
-        document.getElementById('updateProductMaxStock').value = selectedOption.getAttribute('data-max-stock');
-        document.getElementById('updateProductMinStock').value = selectedOption.getAttribute('data-min-stock');
-        document.getElementById('updateProductCategory').value = selectedOption.getAttribute('data-category');
-    } else {
-        document.getElementById('updateProductForm').style.display = 'none';
-    }
-}
-
-function addNewProduct() {
-    const form = document.getElementById('addProductForm');
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-
-    // Validate form
-    if (!validateProductForm(data)) {
-        return;
-    }
-
-    showLoading();
-
-    fetch('/admin/add-product/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRFToken()
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(result => {
-        hideLoading();
-        if (result.success) {
-            showNotification('Product added successfully!', 'success');
-            hideAddProduct();
-            refreshDashboard();
-        } else {
-            showNotification('Error: ' + result.message, 'error');
-        }
-    })
-    .catch(error => {
-        hideLoading();
-        showNotification('Error adding product: ' + error.message, 'error');
-    });
-}
-
-function updateExistingProduct() {
-    const form = document.getElementById('updateProductForm');
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-
-    // Validate form
-    if (!validateProductForm(data)) {
-        return;
-    }
-
-    showLoading();
-
-    fetch('/admin/update-product/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRFToken()
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(result => {
-        hideLoading();
-        if (result.success) {
-            showNotification('Product updated successfully!', 'success');
-            hideUpdateProduct();
-            refreshDashboard();
-        } else {
-            showNotification('Error: ' + result.message, 'error');
-        }
-    })
-    .catch(error => {
-        hideLoading();
-        showNotification('Error updating product: ' + error.message, 'error');
-    });
-}
-
-function confirmDelete() {
-    const productId = document.getElementById('deleteProductSelect').value;
-
-    if (!productId) {
-        showNotification('Please select a product to delete', 'error');
-        return;
-    }
-
-    showLoading();
-
-    fetch('/admin/delete-product/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRFToken()
-        },
-        body: JSON.stringify({ product_id: productId })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(result => {
-        hideLoading();
-        if (result.success) {
-            showNotification('Product deleted successfully!', 'success');
-            hideDeleteProduct();
-            refreshDashboard();
-        } else {
-            showNotification('Error: ' + result.message, 'error');
-        }
-    })
-    .catch(error => {
-        hideLoading();
-        showNotification('Error deleting product: ' + error.message, 'error');
-    });
-}
-
-// Utility Functions
-function showLoading() {
-    document.getElementById('loadingOverlay').style.display = 'flex';
-}
-
-function hideLoading() {
-    document.getElementById('loadingOverlay').style.display = 'none';
-}
-
-function getCSRFToken() {
-    const name = 'csrftoken';
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-function refreshDashboard() {
-    showLoading();
-    setTimeout(() => {
-        window.location.reload();
-    }, 1000);
-}
-
-// Form validation
-function validateProductForm(data) {
-    if (!data.product_id || !data.name || !data.price || !data.stock || !data.max_stock || !data.min_stock) {
-        showNotification('Please fill in all required fields', 'error');
-        return false;
-    }
-
-    if (parseFloat(data.price) <= 0) {
-        showNotification('Price must be greater than 0', 'error');
-        return false;
-    }
-
-    if (parseInt(data.stock) < 0) {
-        showNotification('Stock cannot be negative', 'error');
-        return false;
-    }
-
-    if (parseInt(data.max_stock) <= 0) {
-        showNotification('Max stock must be greater than 0', 'error');
-        return false;
-    }
-
-    if (parseInt(data.min_stock) < 0) {
-        showNotification('Min stock cannot be negative', 'error');
-        return false;
-    }
-
-    if (parseInt(data.stock) > parseInt(data.max_stock)) {
-        showNotification('Current stock cannot exceed max stock', 'error');
-        return false;
-    }
-
-    if (parseInt(data.min_stock) > parseInt(data.max_stock)) {
-        showNotification('Min stock cannot exceed max stock', 'error');
-        return false;
-    }
-
-    return true;
-}
-
-// Notification system
-function showNotification(message, type = 'info') {
-    // Create a simple notification if the vending.js notification system isn't available
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 1rem 1.5rem;
-        border-radius: 5px;
-        font-family: 'Courier New', monospace;
-        font-weight: bold;
-        z-index: 10000;
-        color: white;
-        ${type === 'success' ? 'background: rgba(0, 255, 0, 0.8);' : ''}
-        ${type === 'error' ? 'background: rgba(255, 0, 0, 0.8);' : ''}
-        ${type === 'info' ? 'background: rgba(0, 243, 255, 0.8);' : ''}
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-        }
-    }, 3000);
-}
-
-// Close modals when clicking outside
-window.onclick = function (event) {
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        if (event.target === modal) {
-            if (modal.id === 'addProductModal') hideAddProduct();
-            if (modal.id === 'updateProductModal') hideUpdateProduct();
-            if (modal.id === 'deleteProductModal') hideDeleteProduct();
-        }
-    });
-}
-
-// Make functions globally available
-window.showAddProduct = showAddProduct;
-window.hideAddProduct = hideAddProduct;
-window.showUpdateProduct = showUpdateProduct;
-window.hideUpdateProduct = hideUpdateProduct;
-window.showDeleteProduct = showDeleteProduct;
-window.hideDeleteProduct = hideDeleteProduct;
-window.loadProductData = loadProductData;
-window.confirmDelete = confirmDelete;
-window.refreshDashboard = refreshDashboard;// Admin Dashboard JavaScript
-document.addEventListener('DOMContentLoaded', function () {
-console.log('Admin dashboard loaded');
-initializeProductManagement();
-});
-
-function initializeProductManagement() {
-console.log('Initializing product management...');
-
-// Add product form submission
-const addProductForm = document.getElementById('addProductForm');
-if (addProductForm) {
-addProductForm.addEventListener('submit', function (e) {
-e.preventDefault();
-addNewProduct();
-});
-}
-
-// Update product form submission
-const updateProductForm = document.getElementById('updateProductForm');
-if (updateProductForm) {
-updateProductForm.addEventListener('submit', function (e) {
-e.preventDefault();
-updateExistingProduct();
-});
-}
-
-// Delete product selection handler
-const deleteProductSelect = document.getElementById('deleteProductSelect');
-if (deleteProductSelect) {
-deleteProductSelect.addEventListener('change', function () {
-const warning = document.getElementById('deleteWarning');
-const confirmBtn = document.querySelector('.confirm-delete-btn');
-
-if (this.value) {
-warning.style.display = 'block';
-confirmBtn.style.display = 'block';
-} else {
-warning.style.display = 'none';
-confirmBtn.style.display = 'none';
-}
-});
-}
-}
-
-// Product Management Functions
-function showAddProduct() {
-console.log('Showing add product modal');
-document.getElementById('addProductModal').style.display = 'block';
-}
-
-function hideAddProduct() {
-document.getElementById('addProductModal').style.display = 'none';
-document.getElementById('addProductForm').reset();
-}
-
-function showUpdateProduct() {
-console.log('Showing update product modal');
-document.getElementById('updateProductModal').style.display = 'block';
-}
-
-function hideUpdateProduct() {
-document.getElementById('updateProductModal').style.display = 'none';
-document.getElementById('updateProductSelect').value = '';
-document.getElementById('updateProductForm').style.display = 'none';
-document.getElementById('updateProductForm').reset();
-}
-
-function showDeleteProduct() {
-console.log('Showing delete product modal');
-document.getElementById('deleteProductModal').style.display = 'block';
-}
-
-function hideDeleteProduct() {
-document.getElementById('deleteProductModal').style.display = 'none';
-document.getElementById('deleteProductSelect').value = '';
-document.getElementById('deleteWarning').style.display = 'none';
-document.querySelector('.confirm-delete-btn').style.display = 'none';
-}
-
-function loadProductData() {
-const select = document.getElementById('updateProductSelect');
-const selectedOption = select.options[select.selectedIndex];
-
-if (selectedOption.value) {
-document.getElementById('updateProductForm').style.display = 'block';
-document.getElementById('updateProductId').value = selectedOption.value;
-document.getElementById('updateProductName').value = selectedOption.getAttribute('data-name');
-document.getElementById('updateProductPrice').value = selectedOption.getAttribute('data-price');
-document.getElementById('updateProductStock').value = selectedOption.getAttribute('data-stock');
-document.getElementById('updateProductMaxStock').value = selectedOption.getAttribute('data-max-stock');
-document.getElementById('updateProductMinStock').value = selectedOption.getAttribute('data-min-stock');
-document.getElementById('updateProductCategory').value = selectedOption.getAttribute('data-category');
-} else {
-document.getElementById('updateProductForm').style.display = 'none';
-}
-}
-
-function addNewProduct() {
-const form = document.getElementById('addProductForm');
-const formData = new FormData(form);
-const data = Object.fromEntries(formData.entries());
-
-// Validate form
-if (!validateProductForm(data)) {
-return;
-}
-
-showLoading();
-
-fetch('/admin/add-product/', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json',
-'X-CSRFToken': getCSRFToken()
-},
-body: JSON.stringify(data)
-})
-.then(response => {
-if (!response.ok) {
-throw new Error('Network response was not ok');
-}
-return response.json();
-})
-.then(result => {
-hideLoading();
-if (result.success) {
-showNotification('Product added successfully!', 'success');
-hideAddProduct();
-refreshDashboard();
-} else {
-showNotification('Error: ' + result.message, 'error');
-}
-})
-.catch(error => {
-hideLoading();
-showNotification('Error adding product: ' + error.message, 'error');
-});
-}
-
-function updateExistingProduct() {
-const form = document.getElementById('updateProductForm');
-const formData = new FormData(form);
-const data = Object.fromEntries(formData.entries());
-
-// Validate form
-if (!validateProductForm(data)) {
-return;
-}
-
-showLoading();
-
-fetch('/admin/update-product/', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json',
-'X-CSRFToken': getCSRFToken()
-},
-body: JSON.stringify(data)
-})
-.then(response => {
-if (!response.ok) {
-throw new Error('Network response was not ok');
-}
-return response.json();
-})
-.then(result => {
-hideLoading();
-if (result.success) {
-showNotification('Product updated successfully!', 'success');
-hideUpdateProduct();
-refreshDashboard();
-} else {
-showNotification('Error: ' + result.message, 'error');
-}
-})
-.catch(error => {
-hideLoading();
-showNotification('Error updating product: ' + error.message, 'error');
-});
-}
-
-function confirmDelete() {
-const productId = document.getElementById('deleteProductSelect').value;
-
-if (!productId) {
-showNotification('Please select a product to delete', 'error');
-return;
-}
-
-showLoading();
-
-fetch('/admin/delete-product/', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json',
-'X-CSRFToken': getCSRFToken()
-},
-body: JSON.stringify({ product_id: productId })
-})
-.then(response => {
-if (!response.ok) {
-throw new Error('Network response was not ok');
-}
-return response.json();
-})
-.then(result => {
-hideLoading();
-if (result.success) {
-showNotification('Product deleted successfully!', 'success');
-hideDeleteProduct();
-refreshDashboard();
-} else {
-showNotification('Error: ' + result.message, 'error');
-}
-})
-.catch(error => {
-hideLoading();
-showNotification('Error deleting product: ' + error.message, 'error');
-});
-}
-
-// Utility Functions
-function showLoading() {
-document.getElementById('loadingOverlay').style.display = 'flex';
-}
-
-function hideLoading() {
-document.getElementById('loadingOverlay').style.display = 'none';
-}
-
-function getCSRFToken() {
-const name = 'csrftoken';
-let cookieValue = null;
-if (document.cookie && document.cookie !== '') {
-const cookies = document.cookie.split(';');
-for (let i = 0; i < cookies.length; i++) { const cookie=cookies[i].trim(); if (cookie.substring(0, name.length +
-    1)===(name + '=' )) { cookieValue=decodeURIComponent(cookie.substring(name.length + 1)); break; } } } return
-    cookieValue; } function refreshDashboard() { showLoading(); setTimeout(()=> {
-    window.location.reload();
-    }, 1000);
-    }
-
-    // Form validation
-    function validateProductForm(data) {
-    if (!data.product_id || !data.name || !data.price || !data.stock || !data.max_stock || !data.min_stock) {
-    showNotification('Please fill in all required fields', 'error');
-    return false;
-    }
-
-    if (parseFloat(data.price) <= 0) { showNotification('Price must be greater than 0', 'error' ); return false; } if
-        (parseInt(data.stock) < 0) { showNotification('Stock cannot be negative', 'error' ); return false; } if
-        (parseInt(data.max_stock) <=0) { showNotification('Max stock must be greater than 0', 'error' ); return false; }
-        if (parseInt(data.min_stock) < 0) { showNotification('Min stock cannot be negative', 'error' ); return false; }
-        if (parseInt(data.stock)> parseInt(data.max_stock)) {
-        showNotification('Current stock cannot exceed max stock', 'error');
-        return false;
-        }
-
-        if (parseInt(data.min_stock) > parseInt(data.max_stock)) {
-        showNotification('Min stock cannot exceed max stock', 'error');
-        return false;
-        }
-
-        return true;
-        }
-
-        // Notification system
-        function showNotification(message, type = 'info') {
-        // Create a simple notification if the vending.js notification system isn't available
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.textContent = message;
-        notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 1rem 1.5rem;
-        border-radius: 5px;
-        font-family: 'Courier New', monospace;
-        font-weight: bold;
-        z-index: 10000;
-        color: white;
-        ${type === 'success' ? 'background: rgba(0, 255, 0, 0.8);' : ''}
-        ${type === 'error' ? 'background: rgba(255, 0, 0, 0.8);' : ''}
-        ${type === 'info' ? 'background: rgba(0, 243, 255, 0.8);' : ''}
-        `;
-
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-        if (notification.parentNode) {
-        notification.parentNode.removeChild(notification);
-        }
-        }, 3000);
-        }
-
-        // Close modals when clicking outside
-        window.onclick = function (event) {
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
-        if (event.target === modal) {
-        if (modal.id === 'addProductModal') hideAddProduct();
-        if (modal.id === 'updateProductModal') hideUpdateProduct();
-        if (modal.id === 'deleteProductModal') hideDeleteProduct();
-        }
-        });
-        }
-
-        // Make functions globally available
-        window.showAddProduct = showAddProduct;
-        window.hideAddProduct = hideAddProduct;
-        window.showUpdateProduct = showUpdateProduct;
-        window.hideUpdateProduct = hideUpdateProduct;
-        window.showDeleteProduct = showDeleteProduct;
-        window.hideDeleteProduct = hideDeleteProduct;
-        window.loadProductData = loadProductData;
-        window.confirmDelete = confirmDelete;
-        window.refreshDashboard = refreshDashboard;
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Loading Overlay -->
+<div id="loadingOverlay"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; color: white;">
+    <div style="font-size: 1.5rem;">Loading...</div>
+</div>
+
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header cyber-border">
+        <h1>ASTRO ADMIN DASHBOARD</h1>
+        <p>Vending Machine Management System</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+        <div class="stat-card cyber-border">
+            <h3>Total Products</h3>
+            <div class="stat-value">{{ total_products }}</div>
+        </div>
+        <div class="stat-card cyber-border">
+            <h3>Low Stock</h3>
+            <div class="stat-value">{{ low_stock_products }}</div>
+        </div>
+        <div class="stat-card cyber-border">
+            <h3>Out of Stock</h3>
+            <div class="stat-value">{{ out_of_stock_products }}</div>
+        </div>
+        <div class="stat-card cyber-border">
+            <h3>Total Sales</h3>
+            <div class="stat-value">Rs {{ money_stats.total_sales|floatformat:2 }}</div>
+        </div>
+    </div>
+
+    <!-- Sales Overview -->
+    <div class="sales-section cyber-border">
+        <h2>Sales Overview</h2>
+        <div class="sales-grid">
+            <div class="sales-card">
+                <h4>Today</h4>
+                <p>Rs {{ daily_sales.total_sales|floatformat:2 }}</p>
+                <small>{{ daily_sales.total_transactions }} transactions</small>
+            </div>
+            <div class="sales-card">
+                <h4>This Week</h4>
+                <p>Rs {{ weekly_sales.total_sales|floatformat:2 }}</p>
+                <small>{{ weekly_sales.total_transactions }} transactions</small>
+            </div>
+            <div class="sales-card">
+                <h4>This Month</h4>
+                <p>Rs {{ monthly_sales.total_sales|floatformat:2 }}</p>
+                <small>{{ monthly_sales.total_transactions }} transactions</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Management -->
+    <div class="management-section cyber-border">
+        <h2>Product Management</h2>
+        <div class="management-buttons">
+            <button class="btn cyber-btn" onclick="showAddProduct()">Add Product</button>
+            <button class="btn cyber-btn" onclick="showUpdateProduct()">Update Product</button>
+            <button class="btn cyber-btn" onclick="showDeleteProduct()">Delete Product</button>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="top-products-section cyber-border">
+        <h2>Top Selling Products</h2>
+        <div class="products-grid">
+            {% for item in top_products %}
+            <div class="product-item">
+                <strong>{{ item.product.name }}</strong>
+                <span>Rs {{ item.total_sold|floatformat:2 }}</span>
+            </div>
+            {% empty %}
+            <p>No sales data available</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="transactions-section cyber-border">
+        <h2>Recent Transactions</h2>
+        <div class="transactions-list">
+            {% for transaction in recent_transactions %}
+            <div class="transaction-item">
+                <div class="transaction-info">
+                    <strong>ID: {{ transaction.transaction_id }}</strong>
+                    <span>{{ transaction.date }} {{ transaction.time }}</span>
+                </div>
+                <div class="transaction-details">
+                    <span>Type: {{ transaction.transaction_type }}</span>
+                    <span>Amount: Rs {{ transaction.total_amount }}</span>
+                    {% if transaction.products_purchased %}
+                    <span>Products: {{ transaction.products_purchased }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p>No transactions available</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- All Products -->
+    <div class="all-products-section cyber-border">
+        <h2>All Products</h2>
+        <div class="products-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in all_products %}
+                    <tr>
+                        <td>{{ product.product_id }}</td>
+                        <td>{{ product.name }}</td>
+                        <td>Rs {{ product.price }}</td>
+                        <td>{{ product.stock }}</td>
+                        <td>{{ product.category }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No products available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div id="addProductModal" class="modal">
+    <div class="modal-content cyber-border">
+        <span class="close" onclick="hideAddProduct()">&times;</span>
+        <h3>Add New Product</h3>
+        <form id="addProductForm">
+            <div class="form-group">
+                <label for="product_id">Product ID:</label>
+                <input type="text" id="product_id" name="product_id" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="name">Product Name:</label>
+                <input type="text" id="name" name="name" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="price">Price (Rs):</label>
+                <input type="number" id="price" name="price" step="0.01" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="stock">Stock:</label>
+                <input type="number" id="stock" name="stock" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="max_stock">Max Stock:</label>
+                <input type="number" id="max_stock" name="max_stock" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="min_stock">Min Stock:</label>
+                <input type="number" id="min_stock" name="min_stock" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="category" name="category" required class="form-input">
+                    <option value="snacks">Snacks</option>
+                    <option value="drinks">Drinks</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn cyber-btn">Add Product</button>
+                <button type="button" class="btn cyber-btn" onclick="hideAddProduct()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Update Product Modal -->
+<div id="updateProductModal" class="modal">
+    <div class="modal-content cyber-border">
+        <span class="close" onclick="hideUpdateProduct()">&times;</span>
+        <h3>Update Product</h3>
+        <div class="form-group">
+            <label for="updateProductSelect">Select Product:</label>
+            <select id="updateProductSelect" onchange="loadProductData()" class="form-input">
+                <option value="">Select a product</option>
+                {% for product in all_products %}
+                <option value="{{ product.product_id }}" data-name="{{ product.name }}" data-price="{{ product.price }}"
+                    data-stock="{{ product.stock }}" data-max-stock="{{ product.max_stock }}"
+                    data-min-stock="{{ product.min_stock }}" data-category="{{ product.category }}">
+                    {{ product.product_id }} - {{ product.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <form id="updateProductForm" style="display: none;">
+            <input type="hidden" id="updateProductId" name="product_id">
+            <div class="form-group">
+                <label for="updateProductName">Product Name:</label>
+                <input type="text" id="updateProductName" name="name" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="updateProductPrice">Price (Rs):</label>
+                <input type="number" id="updateProductPrice" name="price" step="0.01" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="updateProductStock">Stock:</label>
+                <input type="number" id="updateProductStock" name="stock" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="updateProductMaxStock">Max Stock:</label>
+                <input type="number" id="updateProductMaxStock" name="max_stock" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="updateProductMinStock">Min Stock:</label>
+                <input type="number" id="updateProductMinStock" name="min_stock" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="updateProductCategory">Category:</label>
+                <select id="updateProductCategory" name="category" required class="form-input">
+                    <option value="snacks">Snacks</option>
+                    <option value="drinks">Drinks</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn cyber-btn">Update Product</button>
+                <button type="button" class="btn cyber-btn" onclick="hideUpdateProduct()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Product Modal -->
+<div id="deleteProductModal" class="modal">
+    <div class="modal-content cyber-border">
+        <span class="close" onclick="hideDeleteProduct()">&times;</span>
+        <h3>Delete Product</h3>
+        <div class="form-group">
+            <label for="deleteProductSelect">Select Product to Delete:</label>
+            <select id="deleteProductSelect" class="form-input">
+                <option value="">Select a product</option>
+                {% for product in all_products %}
+                <option value="{{ product.product_id }}">
+                    {{ product.product_id }} - {{ product.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div id="deleteWarning" class="warning-message" style="display: none;">
+            <p>⚠️ Warning: This action cannot be undone. The product will be permanently deleted.</p>
+        </div>
+        <div class="form-actions">
+            <button type="button" class="btn cyber-btn confirm-delete-btn" onclick="confirmDelete()"
+                style="display: none;">Confirm Delete</button>
+            <button type="button" class="btn cyber-btn" onclick="hideDeleteProduct()">Cancel</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin_dashboard.js' %}"></script>
+{% endblock %}
