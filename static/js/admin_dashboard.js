@@ -188,7 +188,7 @@ function addNewProduct() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
-    console.log('Adding new product:', data);
+    console.log('Adding new product:', data); // Debug log
 
     // Validate form
     if (!validateProductForm(data)) {
@@ -197,41 +197,36 @@ function addNewProduct() {
 
     showLoading();
 
-    // FIXED: Use consistent URL WITH trailing slash
     fetch('/admin/add-product/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRFToken()
+            'X-CSRFToken': getCSRFToken(),
+            'X-Requested-With': 'XMLHttpRequest'  // Add this
         },
         body: JSON.stringify(data)
     })
         .then(response => {
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
-
             if (!response.ok) {
-                // Get more details about the error
                 return response.text().then(text => {
-                    console.error('Response text:', text);
-                    throw new Error(`Network response was not ok: ${response.status} - ${response.statusText}`);
+                    console.error('Error response:', text);  // Add error logging
+                    throw new Error('Network response was not ok');
                 });
             }
             return response.json();
         })
-        .then(result => {
-            console.log('Add product result:', result);
+        .then(data => {
             hideLoading();
-            if (result.success) {
-                showNotification(result.message || 'Product added successfully!', 'success');
+            if (data.success) {
+                showNotification('Product added successfully!', 'success');
+                refreshDashboard();  // Make sure this is working
                 hideAddProduct();
-                refreshDashboard();
             } else {
-                showNotification('Error: ' + (result.message || 'Unknown error'), 'error');
+                showNotification(data.message || 'Failed to add product', 'error');
             }
         })
         .catch(error => {
-            console.error('Error adding product:', error);
+            console.error('Error:', error);  // Add error logging
             hideLoading();
             showNotification('Error adding product: ' + error.message, 'error');
         });

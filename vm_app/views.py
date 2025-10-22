@@ -253,11 +253,7 @@ def process_payment(request):
 # ADMIN PRODUCT MANAGEMENT FUNCTIONS - FIXED VERSION
 @login_required
 @user_passes_test(is_admin)
-@csrf_exempt
 def add_product(request):
-    print(f"Add product view called. Method: {request.method}")  # Debug
-    print(f"User: {request.user}, Is staff: {request.user.is_staff}")  # Debug
-    
     if request.method == 'POST':
         try:
             # Parse JSON data
@@ -330,9 +326,14 @@ def add_product(request):
             
             print(f"Product created successfully: {product}")  # Debug
             return JsonResponse({
-                'success': True, 
+                'success': True,
                 'message': f'Product "{name}" added successfully!',
-                'product_id': product_id
+                'product': {
+                    'id': product.product_id,
+                    'name': product.name,
+                    'price': float(product.price),
+                    'stock': product.stock
+                }
             })
             
         except Exception as e:
