@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction as db_transaction
 import json
-from .models import Product, Cart, MoneyInsertion
+from .models import Product, Cart, MoneyInsertion, MoneyChange
 
 def is_admin(user):
     return user.is_authenticated and user.is_staff

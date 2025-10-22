@@ -79,7 +79,8 @@ def admin_dashboard(request):
     top_products = sorted(top_products, key=lambda x: x['total_sold'], reverse=True)[:5]
     
     # Recent transactions - show ALL transactions (purchases and withdrawals)
-    recent_transactions = MoneyInsertion.objects.all().order_by('-date', '-time')[:20]
+    # Include MoneyChange data using select_related for better performance
+    recent_transactions = MoneyInsertion.objects.all().select_related('change_details').order_by('-date', '-time')[:20]
     
     # All products for management
     all_products_list = Product.objects.all().order_by('product_id')
