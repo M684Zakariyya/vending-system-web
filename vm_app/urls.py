@@ -11,4 +11,5 @@ urlpatterns = [
     path('remove-from-cart/', views.remove_from_cart, name='remove_from_cart'),
     path('clear-cart/', views.clear_cart, name='clear_cart'),
     path('process-payment/', views.process_payment, name='process_payment'),
+    # Note: withdraw-money is in the main urls.py
 ]

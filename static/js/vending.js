@@ -366,15 +366,19 @@ function withdrawMoney() {
             notifications.show('Error withdrawing money: ' + error.message, 'error');
         });
 }
+
 function updateMoneyDisplay() {
     const totalMoneyElement = document.getElementById('totalMoney');
     if (totalMoneyElement) {
         totalMoneyElement.textContent = 'Rs ' + totalMoney.toFixed(2);
     }
+
+    // Update session storage
     sessionStorage.setItem('totalMoney', totalMoney);
 
     // Also update change display
     updateCartTotal();
+    updateLogoAnimation();
 }
 
 function updateLogoAnimation() {
@@ -387,7 +391,6 @@ function updateLogoAnimation() {
         }
     }
 }
-
 // Cart functions
 function addToCart(productId) {
     console.log('Adding to cart:', productId);

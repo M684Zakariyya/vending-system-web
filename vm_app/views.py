@@ -48,6 +48,7 @@ def calculate_total(money_inserted):
 @csrf_exempt
 def withdraw_money(request):
     if request.method == 'POST':
+        # Get money inserted from session
         money_inserted = request.session.get('money_inserted', {})
         total_money = calculate_total(money_inserted)
         
@@ -55,11 +56,14 @@ def withdraw_money(request):
             return JsonResponse({'success': False, 'message': 'No money to withdraw'})
         
         try:
+            # Create withdrawal transaction record
             transaction_obj = MoneyInsertion.objects.create(
                 total_amount=total_money,
-                total_expenses=0,
-                total_change=total_money,
+                total_expenses=0,  # No expenses for withdrawal
+                total_change=total_money,  # All money is returned as change
                 transaction_type='withdrawal',
+                products_purchased='MONEY_WITHDRAWAL',
+                # Store the money that was inserted
                 rs1=money_inserted.get('rs1', 0),
                 rs5=money_inserted.get('rs5', 0),
                 rs10=money_inserted.get('rs10', 0),
@@ -67,33 +71,42 @@ def withdraw_money(request):
                 rs25=money_inserted.get('rs25', 0),
                 rs50=money_inserted.get('rs50', 0),
                 rs100=money_inserted.get('rs100', 0),
-                rs200=money_inserted.get('rs200', 0),
-                change_rs1=money_inserted.get('rs1', 0),
-                change_rs5=money_inserted.get('rs5', 0),
-                change_rs10=money_inserted.get('rs10', 0),
-                change_rs20=money_inserted.get('rs20', 0),
-                change_rs25=money_inserted.get('rs25', 0),
-                change_rs50=money_inserted.get('rs50', 0),
-                change_rs100=money_inserted.get('rs100', 0),
-                change_rs200=money_inserted.get('rs200', 0),
-                products_purchased='MONEY_WITHDRAWAL'
+                rs200=money_inserted.get('rs200', 0)
             )
             
+            # Clear the session data
             if 'money_inserted' in request.session:
                 del request.session['money_inserted']
+            
+            # Clear cart if exists
+            if request.session.session_key:
+                Cart.objects.filter(session_key=request.session.session_key).delete()
+            
             request.session.modified = True
+            
+            # Prepare money breakdown for response
+            money_breakdown = {
+                'rs1': money_inserted.get('rs1', 0),
+                'rs5': money_inserted.get('rs5', 0),
+                'rs10': money_inserted.get('rs10', 0),
+                'rs20': money_inserted.get('rs20', 0),
+                'rs25': money_inserted.get('rs25', 0),
+                'rs50': money_inserted.get('rs50', 0),
+                'rs100': money_inserted.get('rs100', 0),
+                'rs200': money_inserted.get('rs200', 0)
+            }
             
             return JsonResponse({
                 'success': True,
                 'withdrawn_amount': float(total_money),
-                'money_breakdown': money_inserted,
+                'money_breakdown': money_breakdown,
                 'transaction_id': transaction_obj.transaction_id
             })
             
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
     
-    return JsonResponse({'success': False, 'message': 'Invalid request'})
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 # Cart functions
 @csrf_exempt
@@ -237,7 +250,7 @@ def process_payment(request):
     
     return JsonResponse({'success': False})
 
-# Admin product management functions (you already have these)
+# Admin product management functions
 @login_required
 @user_passes_test(is_admin)
 @csrf_exempt

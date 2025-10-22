@@ -31,7 +31,7 @@ class MoneyInsertion(models.Model):
     total_expenses = models.DecimalField(max_digits=8, decimal_places=2)
     total_change = models.DecimalField(max_digits=8, decimal_places=2)
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES, default='purchase')
-    products_purchased = models.TextField(blank=True, null=True)  # Add this field
+    products_purchased = models.TextField(blank=True, null=True)  # Make sure this exists
     
     # Money inserted details
     rs1 = models.IntegerField(default=0)
@@ -45,7 +45,7 @@ class MoneyInsertion(models.Model):
     
     def __str__(self):
         return f"MoneyInsertion {self.transaction_id} - {self.date} {self.time}"
-
+    
 class MoneyChange(models.Model):
     money_insertion = models.OneToOneField(
         MoneyInsertion, 
