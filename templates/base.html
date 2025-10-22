@@ -6,20 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASTRO Vending Machine</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
 
-    <!-- Page-specific CSS -->
-    {% if request.path == '/' %}
+    <!-- Load all CSS files -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    {% elif 'admin-dashboard' in request.path %}
     <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
-    {% elif 'admin-login' in request.path %}
     <link rel="stylesheet" href="{% static 'css/admin_login.css' %}">
-    {% elif 'admin-logout' in request.path %}
     <link rel="stylesheet" href="{% static 'css/admin_logout.css' %}">
-    {% elif 'about' in request.path or 'ideas' in request.path %}
     <link rel="stylesheet" href="{% static 'css/ideas.css' %}">
-    {% endif %}
 </head>
 
 <body>

@@ -61,9 +61,16 @@ WSGI_APPLICATION = 'vending_machine.wsgi.application'
 # Database
 DATABASE_URL = config('DATABASE_URL', default='sqlite:///db.sqlite3')
 
-if DATABASE_URL.startswith('postgres://'):
+if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
     DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
 
+DATABASES = {
+    'default': dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        ssl_require=not DEBUG
+    )
+}
 DATABASES = {
     'default': {
 'ENGINE': 'django.db.backends.postgresql',
@@ -100,7 +107,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')],
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files

@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from accounts.views import admin_login, admin_dashboard, admin_logout
 from vm_app.views import add_product, update_product, delete_product, withdraw_money
 
@@ -14,3 +16,8 @@ urlpatterns = [
     path('withdraw-money/', withdraw_money, name='withdraw_money'),
     path('', include('vm_app.urls')),
 ]
+
+# Serve static files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
