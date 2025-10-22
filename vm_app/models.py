@@ -31,6 +31,7 @@ class MoneyInsertion(models.Model):
     total_expenses = models.DecimalField(max_digits=8, decimal_places=2)
     total_change = models.DecimalField(max_digits=8, decimal_places=2)
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES, default='purchase')
+    products_purchased = models.TextField(blank=True, null=True)  # Add this field
     
     # Money inserted details
     rs1 = models.IntegerField(default=0)
