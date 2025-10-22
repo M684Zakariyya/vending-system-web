@@ -63,20 +63,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'vending_machine.wsgi.application'
 
-# Database configuration
+# Simpler database configuration
 DATABASE_URL = config('DATABASE_URL', default='sqlite:///db.sqlite3')
 
-if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
+# Force PostgreSQL format
+if DATABASE_URL.startswith('postgres://'):
     DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=DATABASE_URL,
+    'default': dj_database_url.parse(
+        DATABASE_URL, 
         conn_max_age=600,
-        ssl_require=not DEBUG
+        ssl_require=True  # Force SSL for Railway
     )
 }
-
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
