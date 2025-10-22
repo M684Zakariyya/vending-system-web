@@ -17,7 +17,7 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.product_id} - {self.name}"
 
-class Transaction(models.Model):
+class MoneyInsertion(models.Model):
     TRANSACTION_TYPES = [
         ('purchase', 'Purchase'),
         ('withdrawal', 'Withdrawal'),
@@ -42,6 +42,16 @@ class Transaction(models.Model):
     rs100 = models.IntegerField(default=0)
     rs200 = models.IntegerField(default=0)
     
+    def __str__(self):
+        return f"MoneyInsertion {self.transaction_id} - {self.date} {self.time}"
+
+class MoneyChange(models.Model):
+    money_insertion = models.OneToOneField(
+        MoneyInsertion, 
+        on_delete=models.CASCADE,
+        related_name='change_details'
+    )
+    
     # Change returned details
     change_rs1 = models.IntegerField(default=0)
     change_rs5 = models.IntegerField(default=0)
@@ -55,7 +65,7 @@ class Transaction(models.Model):
     products_purchased = models.TextField()
     
     def __str__(self):
-        return f"Transaction {self.transaction_id} - {self.date} {self.time}"
+        return f"MoneyChange for Transaction {self.money_insertion.transaction_id}"
 
 class Cart(models.Model):
     session_key = models.CharField(max_length=40)
