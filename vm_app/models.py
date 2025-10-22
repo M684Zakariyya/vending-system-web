@@ -34,14 +34,14 @@ class MoneyInsertion(models.Model):
     products_purchased = models.TextField(blank=True, null=True)  # Make sure this exists
     
     # Money inserted details
-    rs1 = models.IntegerField(default=0)
-    rs5 = models.IntegerField(default=0)
-    rs10 = models.IntegerField(default=0)
-    rs20 = models.IntegerField(default=0)
-    rs25 = models.IntegerField(default=0)
-    rs50 = models.IntegerField(default=0)
-    rs100 = models.IntegerField(default=0)
-    rs200 = models.IntegerField(default=0)
+    rs1 = models.PositiveIntegerField(default=0)
+    rs5 = models.PositiveIntegerField(default=0)
+    rs10 = models.PositiveIntegerField(default=0)
+    rs20 = models.PositiveIntegerField(default=0)
+    rs25 = models.PositiveIntegerField(default=0)
+    rs50 = models.PositiveIntegerField(default=0)
+    rs100 = models.PositiveIntegerField(default=0)
+    rs200 = models.PositiveIntegerField(default=0)
     
     def __str__(self):
         return f"MoneyInsertion {self.transaction_id} - {self.date} {self.time}"

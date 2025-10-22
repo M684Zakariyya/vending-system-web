@@ -26,21 +26,36 @@ def ideas(request):
 @csrf_exempt
 def add_funds(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        denomination = data.get('denomination')
+        try:
+            data = json.loads(request.body)
+            denomination = data.get('denomination')
+            
+            # Initialize if not exists
+            if 'money_inserted' not in request.session:
+                request.session['money_inserted'] = {
+                    'rs1': 0, 'rs5': 0, 'rs10': 0, 'rs20': 0,
+                    'rs25': 0, 'rs50': 0, 'rs100': 0, 'rs200': 0
+                }
+            
+            # Validate denomination
+            valid_denominations = ['rs1', 'rs5', 'rs10', 'rs20', 'rs25', 'rs50', 'rs100', 'rs200']
+            if denomination not in valid_denominations:
+                return JsonResponse({'success': False, 'message': 'Invalid denomination'})
+            
+            # Add funds
+            request.session['money_inserted'][denomination] += 1
+            request.session.modified = True
+            
+            total = calculate_total(request.session['money_inserted'])
+            return JsonResponse({
+                'success': True, 
+                'total_money': total,
+                'denomination_added': denomination
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
         
-        if 'money_inserted' not in request.session:
-            request.session['money_inserted'] = {
-                'rs1': 0, 'rs5': 0, 'rs10': 0, 'rs20': 0,
-                'rs25': 0, 'rs50': 0, 'rs100': 0, 'rs200': 0
-            }
-        
-        request.session['money_inserted'][denomination] += 1
-        request.session.modified = True
-        
-        total = calculate_total(request.session['money_inserted'])
-        return JsonResponse({'success': True, 'total_money': total})
-
 def calculate_total(money_inserted):
     denominations = {'rs1': 1, 'rs5': 5, 'rs10': 10, 'rs20': 20, 'rs25': 25, 'rs50': 50, 'rs100': 100, 'rs200': 200}
     return sum(denominations[denom] * count for denom, count in money_inserted.items())
@@ -72,6 +87,21 @@ def withdraw_money(request):
                 rs50=money_inserted.get('rs50', 0),
                 rs100=money_inserted.get('rs100', 0),
                 rs200=money_inserted.get('rs200', 0)
+            )
+            
+            # CREATE MONEYCHANGE RECORD FOR WITHDRAWAL
+            # For withdrawal, the change breakdown is exactly what was inserted
+            MoneyChange.objects.create(
+                money_insertion=transaction_obj,
+                products_purchased='MONEY_WITHDRAWAL',
+                change_rs1=money_inserted.get('rs1', 0),
+                change_rs5=money_inserted.get('rs5', 0),
+                change_rs10=money_inserted.get('rs10', 0),
+                change_rs20=money_inserted.get('rs20', 0),
+                change_rs25=money_inserted.get('rs25', 0),
+                change_rs50=money_inserted.get('rs50', 0),
+                change_rs100=money_inserted.get('rs100', 0),
+                change_rs200=money_inserted.get('rs200', 0)
             )
             
             # Clear the session data
@@ -191,6 +221,46 @@ def clear_cart(request):
         Cart.objects.filter(session_key=request.session.session_key).delete()
         return JsonResponse({'success': True})
 
+def calculate_change_breakdown(change_amount):
+    """
+    Calculate how change should be broken down into denominations
+    Returns a dictionary with counts for each denomination
+    """
+    change_float = float(change_amount)
+    breakdown = {
+        'change_rs200': 0,
+        'change_rs100': 0,
+        'change_rs50': 0,
+        'change_rs25': 0,
+        'change_rs20': 0,
+        'change_rs10': 0,
+        'change_rs5': 0,
+        'change_rs1': 0
+    }
+    
+    denominations = [
+        (200, 'change_rs200'),
+        (100, 'change_rs100'),
+        (50, 'change_rs50'),
+        (25, 'change_rs25'),
+        (20, 'change_rs20'),
+        (10, 'change_rs10'),
+        (5, 'change_rs5'),
+        (1, 'change_rs1')
+    ]
+    
+    remaining = change_float
+    
+    for denom_value, field_name in denominations:
+        if remaining >= denom_value:
+            count = int(remaining // denom_value)
+            breakdown[field_name] = count
+            remaining -= count * denom_value
+            # Round to avoid floating point precision issues
+            remaining = round(remaining, 2)
+    
+    return breakdown
+
 @csrf_exempt
 def process_payment(request):
     if request.method == 'POST':
@@ -204,7 +274,8 @@ def process_payment(request):
                     return JsonResponse({'success': False, 'message': 'Cart is empty'})
                 
                 total_cost = sum(item.product.price * item.quantity for item in cart_items)
-                money_inserted = calculate_total(request.session.get('money_inserted', {}))
+                money_inserted_dict = request.session.get('money_inserted', {})
+                money_inserted = calculate_total(money_inserted_dict)
                 
                 if money_inserted < total_cost:
                     return JsonResponse({
@@ -225,31 +296,69 @@ def process_payment(request):
                     product.save()
                     purchased_products.append(f"{product.name} x{item.quantity}")
 
-                # Create PURCHASE transaction
+                # Calculate change
+                change_amount = money_inserted - total_cost
+                
+                # Create PURCHASE transaction with denomination details
                 transaction_obj = MoneyInsertion.objects.create(
                     total_amount=money_inserted,
                     total_expenses=total_cost,
-                    total_change=money_inserted - total_cost,
+                    total_change=change_amount,
                     transaction_type='purchase',
-                    products_purchased=', '.join(purchased_products)
+                    products_purchased=', '.join(purchased_products),
+                    # Store the money that was inserted
+                    rs1=money_inserted_dict.get('rs1', 0),
+                    rs5=money_inserted_dict.get('rs5', 0),
+                    rs10=money_inserted_dict.get('rs10', 0),
+                    rs20=money_inserted_dict.get('rs20', 0),
+                    rs25=money_inserted_dict.get('rs25', 0),
+                    rs50=money_inserted_dict.get('rs50', 0),
+                    rs100=money_inserted_dict.get('rs100', 0),
+                    rs200=money_inserted_dict.get('rs200', 0)
                 )
+
+                # CREATE MONEYCHANGE RECORD - Calculate change breakdown
+                if change_amount > 0:
+                    change_breakdown = calculate_change_breakdown(change_amount)
+                    
+                    MoneyChange.objects.create(
+                        money_insertion=transaction_obj,
+                        products_purchased=', '.join(purchased_products),
+                        **change_breakdown  # Unpack the change breakdown dictionary
+                    )
+                else:
+                    # Create MoneyChange record with zero change
+                    MoneyChange.objects.create(
+                        money_insertion=transaction_obj,
+                        products_purchased=', '.join(purchased_products),
+                        change_rs1=0,
+                        change_rs5=0,
+                        change_rs10=0,
+                        change_rs20=0,
+                        change_rs25=0,
+                        change_rs50=0,
+                        change_rs100=0,
+                        change_rs200=0
+                    )
 
                 # Clear cart and session
                 cart_items.delete()
                 if 'money_inserted' in request.session:
                     del request.session['money_inserted']
                 
+                request.session.modified = True
+                
                 return JsonResponse({
                     'success': True,
-                    'change': float(money_inserted - total_cost),
+                    'change': float(change_amount),
                     'transaction_id': transaction_obj.transaction_id
                 })
                 
         except Exception as e:
+            print(f"Payment processing error: {str(e)}")
             return JsonResponse({'success': False, 'message': str(e)})
     
     return JsonResponse({'success': False})
-
 @login_required
 @user_passes_test(is_admin)
 def add_product(request):
