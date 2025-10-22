@@ -1,6 +1,25 @@
-// Admin Dashboard JavaScript
+// Admin Dashboard JavaScript - COMPLETE FIXED VERSION
+
+// Connection test function
+function testConnection() {
+    console.log('Testing connection to server...');
+
+    fetch('/admin-dashboard/')
+        .then(response => {
+            console.log('Dashboard connection test:', response.status);
+            return response.text();
+        })
+        .then(data => {
+            console.log('Dashboard loaded successfully');
+        })
+        .catch(error => {
+            console.error('Connection test failed:', error);
+        });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log('Admin dashboard loaded');
+    testConnection();
     initializeProductManagement();
 });
 
@@ -139,8 +158,8 @@ function addNewProduct() {
 
     showLoading();
 
-    // FIXED: Use consistent URL without trailing slash
-    fetch('/admin/add-product', {
+    // FIXED: Use consistent URL WITH trailing slash
+    fetch('/admin/add-product/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -193,8 +212,8 @@ function updateExistingProduct() {
 
     showLoading();
 
-    // FIXED: Use consistent URL without trailing slash
-    fetch('/admin/update-product', {
+    // FIXED: Use consistent URL WITH trailing slash
+    fetch('/admin/update-product/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -238,8 +257,8 @@ function confirmDelete() {
     console.log('Deleting product:', productId);
     showLoading();
 
-    // FIXED: Use consistent URL without trailing slash
-    fetch('/admin/delete-product', {
+    // FIXED: Use consistent URL WITH trailing slash
+    fetch('/admin/delete-product/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -288,6 +307,7 @@ function hideLoading() {
 }
 
 function getCSRFToken() {
+    // Try to get from cookie first
     const name = 'csrftoken';
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -300,6 +320,15 @@ function getCSRFToken() {
             }
         }
     }
+
+    // If not found in cookie, try to get from form input
+    if (!cookieValue) {
+        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfInput) {
+            cookieValue = csrfInput.value;
+        }
+    }
+
     return cookieValue;
 }
 
