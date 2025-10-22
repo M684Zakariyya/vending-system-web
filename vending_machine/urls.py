@@ -11,13 +11,12 @@ urlpatterns = [
     path('admin-dashboard/', admin_dashboard, name='admin_dashboard'),
     path('admin-logout/', admin_logout, name='admin_logout'),
     
-    # Product management URLs - MOVED BEFORE include to avoid conflicts
+    # Product management URLs - FIXED: Add trailing slashes for consistency
     path('admin/add-product/', add_product, name='add_product'),
     path('admin/update-product/', update_product, name='update_product'),
     path('admin/delete-product/', delete_product, name='delete_product'),
-    path('withdraw-money/', withdraw_money, name='withdraw_money'),
     
-    # This should be LAST to avoid catching other URLs
+    path('withdraw-money/', withdraw_money, name='withdraw_money'),
     path('', include('vm_app.urls')),
 ]
 

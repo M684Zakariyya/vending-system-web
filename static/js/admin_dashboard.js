@@ -17,47 +17,8 @@ function testConnection() {
         });
 }
 
-// Enhanced CSRF Token Function
-function getCSRFToken() {
-    // Try to get from hidden field first
-    const csrfField = document.getElementById('csrf_token');
-    if (csrfField) {
-        console.log('CSRF token found in hidden field');
-        return csrfField.value;
-    }
-
-    // Try to get from form input
-    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
-    if (csrfInput) {
-        console.log('CSRF token found in form input');
-        return csrfInput.value;
-    }
-
-    // Try to get from cookie
-    const name = 'csrftoken';
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                console.log('CSRF token found in cookie');
-                break;
-            }
-        }
-    }
-
-    if (!cookieValue) {
-        console.error('CSRF token not found!');
-    }
-
-    return cookieValue;
-}
-
 document.addEventListener('DOMContentLoaded', function () {
     console.log('Admin dashboard loaded');
-    console.log('CSRF Token available:', getCSRFToken() ? 'Yes' : 'No');
     testConnection();
     initializeProductManagement();
 });
@@ -188,7 +149,7 @@ function addNewProduct() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
-    console.log('Adding new product:', data); // Debug log
+    console.log('Adding new product:', data);
 
     // Validate form
     if (!validateProductForm(data)) {
@@ -197,36 +158,41 @@ function addNewProduct() {
 
     showLoading();
 
+    // FIXED: Use consistent URL WITH trailing slash
     fetch('/admin/add-product/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRFToken(),
-            'X-Requested-With': 'XMLHttpRequest'  // Add this
+            'X-CSRFToken': getCSRFToken()
         },
         body: JSON.stringify(data)
     })
         .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+
             if (!response.ok) {
+                // Get more details about the error
                 return response.text().then(text => {
-                    console.error('Error response:', text);  // Add error logging
-                    throw new Error('Network response was not ok');
+                    console.error('Response text:', text);
+                    throw new Error(`Network response was not ok: ${response.status} - ${response.statusText}`);
                 });
             }
             return response.json();
         })
-        .then(data => {
+        .then(result => {
+            console.log('Add product result:', result);
             hideLoading();
-            if (data.success) {
-                showNotification('Product added successfully!', 'success');
-                refreshDashboard();  // Make sure this is working
+            if (result.success) {
+                showNotification(result.message || 'Product added successfully!', 'success');
                 hideAddProduct();
+                refreshDashboard();
             } else {
-                showNotification(data.message || 'Failed to add product', 'error');
+                showNotification('Error: ' + (result.message || 'Unknown error'), 'error');
             }
         })
         .catch(error => {
-            console.error('Error:', error);  // Add error logging
+            console.error('Error adding product:', error);
             hideLoading();
             showNotification('Error adding product: ' + error.message, 'error');
         });
@@ -338,6 +304,32 @@ function hideLoading() {
     if (loadingOverlay) {
         loadingOverlay.style.display = 'none';
     }
+}
+
+function getCSRFToken() {
+    // Try to get from cookie first
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+
+    // If not found in cookie, try to get from form input
+    if (!cookieValue) {
+        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfInput) {
+            cookieValue = csrfInput.value;
+        }
+    }
+
+    return cookieValue;
 }
 
 function refreshDashboard() {
