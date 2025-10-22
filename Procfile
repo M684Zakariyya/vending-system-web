@@ -1,0 +1,1 @@
+web: gunicorn vending_machine.wsgi:application
