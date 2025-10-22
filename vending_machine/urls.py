@@ -11,7 +11,7 @@ urlpatterns = [
     path('admin-dashboard/', admin_dashboard, name='admin_dashboard'),
     path('admin-logout/', admin_logout, name='admin_logout'),
     
-    # Product management URLs - FIXED: Add trailing slashes for consistency
+    # Product management URLs - FIXED
     path('admin/add-product/', add_product, name='add_product'),
     path('admin/update-product/', update_product, name='update_product'),
     path('admin/delete-product/', delete_product, name='delete_product'),

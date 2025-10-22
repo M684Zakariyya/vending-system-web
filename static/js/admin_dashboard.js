@@ -17,9 +17,38 @@ function testConnection() {
         });
 }
 
+// Test admin endpoints
+function testAdminEndpoints() {
+    console.log('Testing admin endpoints...');
+
+    const endpoints = [
+        '/admin/add-product/',
+        '/admin/update-product/',
+        '/admin/delete-product/'
+    ];
+
+    endpoints.forEach(endpoint => {
+        fetch(endpoint, {
+            method: 'OPTIONS'
+        })
+            .then(response => {
+                console.log(`${endpoint} status:`, response.status);
+                if (response.status === 404) {
+                    console.error(`${endpoint} NOT FOUND!`);
+                } else {
+                    console.log(`${endpoint} is accessible`);
+                }
+            })
+            .catch(error => {
+                console.error(`Error testing ${endpoint}:`, error);
+            });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log('Admin dashboard loaded');
     testConnection();
+    testAdminEndpoints();
     initializeProductManagement();
 });
 
@@ -158,7 +187,7 @@ function addNewProduct() {
 
     showLoading();
 
-    // FIXED: Use consistent URL WITH trailing slash
+    // FIXED: Use the correct URL
     fetch('/admin/add-product/', {
         method: 'POST',
         headers: {
@@ -169,16 +198,28 @@ function addNewProduct() {
     })
         .then(response => {
             console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
+            console.log('Response URL:', response.url);
 
+            if (response.status === 404) {
+                throw new Error('Endpoint not found (404). Check server URLs.');
+            }
+            if (response.status === 500) {
+                throw new Error('Server error (500). Check server logs.');
+            }
             if (!response.ok) {
-                // Get more details about the error
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Try to parse as JSON
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
                 return response.text().then(text => {
-                    console.error('Response text:', text);
-                    throw new Error(`Network response was not ok: ${response.status} - ${response.statusText}`);
+                    console.warn('Expected JSON, got:', text);
+                    throw new Error('Server returned non-JSON response');
                 });
             }
-            return response.json();
         })
         .then(result => {
             console.log('Add product result:', result);
@@ -212,7 +253,6 @@ function updateExistingProduct() {
 
     showLoading();
 
-    // FIXED: Use consistent URL WITH trailing slash
     fetch('/admin/update-product/', {
         method: 'POST',
         headers: {
@@ -257,7 +297,6 @@ function confirmDelete() {
     console.log('Deleting product:', productId);
     showLoading();
 
-    // FIXED: Use consistent URL WITH trailing slash
     fetch('/admin/delete-product/', {
         method: 'POST',
         headers: {

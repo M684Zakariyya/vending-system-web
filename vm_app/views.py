@@ -250,7 +250,6 @@ def process_payment(request):
     
     return JsonResponse({'success': False})
 
-# ADMIN PRODUCT MANAGEMENT FUNCTIONS - FIXED VERSION
 @login_required
 @user_passes_test(is_admin)
 def add_product(request):
@@ -272,7 +271,7 @@ def add_product(request):
             min_stock = data.get('min_stock')
             category = data.get('category', 'snacks')
             
-            print(f"Parsed data - ID: {product_id}, Name: {name}, Price: {price}")  # Debug
+            print(f"Parsed data - ID: {product_id}, Name: {name}, Price: {price}")
             
             # Validate required fields
             if not all([product_id, name, price, stock, max_stock, min_stock]):
@@ -296,7 +295,7 @@ def add_product(request):
                 max_stock = int(max_stock)
                 min_stock = int(min_stock)
             except (ValueError, TypeError) as e:
-                print(f"Number conversion error: {e}")  # Debug
+                print(f"Number conversion error: {e}")
                 return JsonResponse({'success': False, 'message': 'Invalid number format'})
             
             # Validate numeric values
@@ -324,7 +323,7 @@ def add_product(request):
                 category=category
             )
             
-            print(f"Product created successfully: {product}")  # Debug
+            print(f"Product created successfully: {product}")
             return JsonResponse({
                 'success': True,
                 'message': f'Product "{name}" added successfully!',
@@ -337,9 +336,9 @@ def add_product(request):
             })
             
         except Exception as e:
-            print(f"Error adding product: {str(e)}")  # Debug
+            print(f"Error adding product: {str(e)}")
             import traceback
-            print(f"Traceback: {traceback.format_exc()}")  # Detailed error
+            print(f"Traceback: {traceback.format_exc()}")
             return JsonResponse({'success': False, 'message': f'Server error: {str(e)}'})
     
     # If not POST request
@@ -347,85 +346,9 @@ def add_product(request):
 
 @login_required
 @user_passes_test(is_admin)
-@csrf_exempt
 def update_product(request):
-    print(f"Update product view called. Method: {request.method}")  # Debug
+    print(f"Update product view called. Method: {request.method}")
     
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            print("Update product data:", data)
-            
-            product_id = data.get('product_id')
-            
-            if not product_id:
-                return JsonResponse({'success': False, 'message': 'Product ID is required'})
-            
-            # Get existing product
-            product = get_object_or_404(Product, product_id=product_id)
-            
-            # Update fields
-            if 'name' in data:
-                product.name = data['name'].strip()
-            
-            # Convert numeric fields
-            try:
-                if 'price' in data:
-                    product.price = float(data['price'])
-                if 'stock' in data:
-                    product.stock = int(data['stock'])
-                if 'max_stock' in data:
-                    product.max_stock = int(data['max_stock'])
-                if 'min_stock' in data:
-                    product.min_stock = int(data['min_stock'])
-            except (ValueError, TypeError):
-                return JsonResponse({'success': False, 'message': 'Invalid number format'})
-            
-            if 'category' in data:
-                product.category = data['category']
-            
-            product.save()
-            
-            return JsonResponse({'success': True, 'message': 'Product updated successfully'})
-            
-        except Exception as e:
-            print(f"Error updating product: {str(e)}")
-            return JsonResponse({'success': False, 'message': str(e)})
-    
-    return JsonResponse({'success': False, 'message': 'Invalid request method'})
-
-@login_required
-@user_passes_test(is_admin)
-@csrf_exempt
-def delete_product(request):
-    print(f"Delete product view called. Method: {request.method}")  # Debug
-    
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            print("Delete product data:", data)
-            
-            product_id = data.get('product_id')
-            
-            if not product_id:
-                return JsonResponse({'success': False, 'message': 'Product ID is required'})
-            
-            # Get and delete product
-            product = get_object_or_404(Product, product_id=product_id)
-            product_name = product.name
-            product.delete()
-            
-            return JsonResponse({'success': True, 'message': f'Product "{product_name}" deleted successfully'})
-            
-        except Exception as e:
-            print(f"Error deleting product: {str(e)}")
-            return JsonResponse({'success': False, 'message': str(e)})
-    
-    return JsonResponse({'success': False, 'message': 'Invalid request method'})
-@login_required
-@user_passes_test(is_admin)
-@csrf_exempt
-def update_product(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -465,8 +388,9 @@ def update_product(request):
 
 @login_required
 @user_passes_test(is_admin)
-@csrf_exempt
 def delete_product(request):
+    print(f"Delete product view called. Method: {request.method}")
+    
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
