@@ -4,24 +4,9 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeProductManagement();
 });
 
-// CSRF Token function
-function getCSRFToken() {
-    const name = 'csrftoken';
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
 function initializeProductManagement() {
+    console.log('Initializing product management...');
+
     // Add product form submission
     const addProductForm = document.getElementById('addProductForm');
     if (addProductForm) {
@@ -39,10 +24,28 @@ function initializeProductManagement() {
             updateExistingProduct();
         });
     }
+
+    // Delete product selection handler
+    const deleteProductSelect = document.getElementById('deleteProductSelect');
+    if (deleteProductSelect) {
+        deleteProductSelect.addEventListener('change', function () {
+            const warning = document.getElementById('deleteWarning');
+            const confirmBtn = document.querySelector('.confirm-delete-btn');
+
+            if (this.value) {
+                warning.style.display = 'block';
+                confirmBtn.style.display = 'block';
+            } else {
+                warning.style.display = 'none';
+                confirmBtn.style.display = 'none';
+            }
+        });
+    }
 }
 
 // Product Management Functions
 function showAddProduct() {
+    console.log('Showing add product modal');
     document.getElementById('addProductModal').style.display = 'block';
 }
 
@@ -52,6 +55,7 @@ function hideAddProduct() {
 }
 
 function showUpdateProduct() {
+    console.log('Showing update product modal');
     document.getElementById('updateProductModal').style.display = 'block';
 }
 
@@ -63,6 +67,7 @@ function hideUpdateProduct() {
 }
 
 function showDeleteProduct() {
+    console.log('Showing delete product modal');
     document.getElementById('deleteProductModal').style.display = 'block';
 }
 
@@ -96,6 +101,11 @@ function addNewProduct() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
+    // Validate form
+    if (!validateProductForm(data)) {
+        return;
+    }
+
     showLoading();
 
     fetch('/admin/add-product/', {
@@ -106,20 +116,25 @@ function addNewProduct() {
         },
         body: JSON.stringify(data)
     })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(result => {
             hideLoading();
             if (result.success) {
-                alert('Product added successfully!');
+                showNotification('Product added successfully!', 'success');
                 hideAddProduct();
                 refreshDashboard();
             } else {
-                alert('Error: ' + result.message);
+                showNotification('Error: ' + result.message, 'error');
             }
         })
         .catch(error => {
             hideLoading();
-            alert('Error adding product: ' + error.message);
+            showNotification('Error adding product: ' + error.message, 'error');
         });
 }
 
@@ -127,6 +142,11 @@ function updateExistingProduct() {
     const form = document.getElementById('updateProductForm');
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
+
+    // Validate form
+    if (!validateProductForm(data)) {
+        return;
+    }
 
     showLoading();
 
@@ -138,20 +158,25 @@ function updateExistingProduct() {
         },
         body: JSON.stringify(data)
     })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(result => {
             hideLoading();
             if (result.success) {
-                alert('Product updated successfully!');
+                showNotification('Product updated successfully!', 'success');
                 hideUpdateProduct();
                 refreshDashboard();
             } else {
-                alert('Error: ' + result.message);
+                showNotification('Error: ' + result.message, 'error');
             }
         })
         .catch(error => {
             hideLoading();
-            alert('Error updating product: ' + error.message);
+            showNotification('Error updating product: ' + error.message, 'error');
         });
 }
 
@@ -159,7 +184,7 @@ function confirmDelete() {
     const productId = document.getElementById('deleteProductSelect').value;
 
     if (!productId) {
-        alert('Please select a product to delete');
+        showNotification('Please select a product to delete', 'error');
         return;
     }
 
@@ -173,36 +198,27 @@ function confirmDelete() {
         },
         body: JSON.stringify({ product_id: productId })
     })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(result => {
             hideLoading();
             if (result.success) {
-                alert('Product deleted successfully!');
+                showNotification('Product deleted successfully!', 'success');
                 hideDeleteProduct();
                 refreshDashboard();
             } else {
-                alert('Error: ' + result.message);
+                showNotification('Error: ' + result.message, 'error');
             }
         })
         .catch(error => {
             hideLoading();
-            alert('Error deleting product: ' + error.message);
+            showNotification('Error deleting product: ' + error.message, 'error');
         });
 }
-
-// Delete product selection handler
-document.getElementById('deleteProductSelect').addEventListener('change', function () {
-    const warning = document.getElementById('deleteWarning');
-    const confirmBtn = document.querySelector('.confirm-delete-btn');
-
-    if (this.value) {
-        warning.style.display = 'block';
-        confirmBtn.style.display = 'block';
-    } else {
-        warning.style.display = 'none';
-        confirmBtn.style.display = 'none';
-    }
-});
 
 // Utility Functions
 function showLoading() {
@@ -234,124 +250,6 @@ function refreshDashboard() {
     setTimeout(() => {
         window.location.reload();
     }, 1000);
-}
-
-// Close modals when clicking outside
-window.onclick = function (event) {
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        if (event.target === modal) {
-            if (modal.id === 'addProductModal') hideAddProduct();
-            if (modal.id === 'updateProductModal') hideUpdateProduct();
-            if (modal.id === 'deleteProductModal') hideDeleteProduct();
-        }
-    });
-}
-
-// Enhanced form loading states
-function setFormLoading(form, isLoading) {
-    if (isLoading) {
-        form.classList.add('form-loading');
-        const buttons = form.querySelectorAll('button[type="submit"], button[type="button"]');
-        buttons.forEach(button => {
-            button.disabled = true;
-            const originalText = button.textContent;
-            button.setAttribute('data-original-text', originalText);
-            button.textContent = 'Processing...';
-        });
-    } else {
-        form.classList.remove('form-loading');
-        const buttons = form.querySelectorAll('button[type="submit"], button[type="button"]');
-        buttons.forEach(button => {
-            button.disabled = false;
-            const originalText = button.getAttribute('data-original-text');
-            if (originalText) {
-                button.textContent = originalText;
-            }
-        });
-    }
-}
-
-// Enhanced add product function
-function addNewProduct() {
-    const form = document.getElementById('addProductForm');
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-
-    // Validate form
-    if (!validateProductForm(data)) {
-        return;
-    }
-
-    setFormLoading(form, true);
-    showLoading();
-
-    fetch('/admin/add-product/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRFToken()
-        },
-        body: JSON.stringify(data)
-    })
-        .then(response => response.json())
-        .then(result => {
-            hideLoading();
-            setFormLoading(form, false);
-            if (result.success) {
-                showNotification('Product added successfully!', 'success');
-                hideAddProduct();
-                refreshDashboard();
-            } else {
-                showNotification('Error: ' + result.message, 'error');
-            }
-        })
-        .catch(error => {
-            hideLoading();
-            setFormLoading(form, false);
-            showNotification('Error adding product: ' + error.message, 'error');
-        });
-}
-
-// Enhanced update product function
-function updateExistingProduct() {
-    const form = document.getElementById('updateProductForm');
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-
-    // Validate form
-    if (!validateProductForm(data)) {
-        return;
-    }
-
-    setFormLoading(form, true);
-    showLoading();
-
-    fetch('/admin/update-product/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRFToken()
-        },
-        body: JSON.stringify(data)
-    })
-        .then(response => response.json())
-        .then(result => {
-            hideLoading();
-            setFormLoading(form, false);
-            if (result.success) {
-                showNotification('Product updated successfully!', 'success');
-                hideUpdateProduct();
-                refreshDashboard();
-            } else {
-                showNotification('Error: ' + result.message, 'error');
-            }
-        })
-        .catch(error => {
-            hideLoading();
-            setFormLoading(form, false);
-            showNotification('Error updating product: ' + error.message, 'error');
-        });
 }
 
 // Form validation
@@ -394,157 +292,47 @@ function validateProductForm(data) {
     return true;
 }
 
-// Enhanced notification system for admin
+// Notification system
 function showNotification(message, type = 'info') {
-    // Use the existing notification system from vending.js
-    if (window.notifications) {
-        window.notifications.show(message, type);
-    } else {
-        // Fallback to alert
-        alert(message);
-    }
-}
+    // Create a simple notification if the vending.js notification system isn't available
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 5px;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        z-index: 10000;
+        color: white;
+        ${type === 'success' ? 'background: rgba(0, 255, 0, 0.8);' : ''}
+        ${type === 'error' ? 'background: rgba(255, 0, 0, 0.8);' : ''}
+        ${type === 'info' ? 'background: rgba(0, 243, 255, 0.8);' : ''}
+    `;
 
-// Enhanced modal show/hide with animations
-// Enhanced modal show/hide with proper centering
-function showAddProduct() {
-    const modal = document.getElementById('addProductModal');
-    const modalContent = modal.querySelector('.modal-content');
-    modal.style.display = 'block';
-
-    // Force reflow
-    modal.offsetHeight;
-
-    // Add show class for animation
-    setTimeout(() => {
-        modalContent.classList.add('show');
-    }, 10);
-}
-
-function hideAddProduct() {
-    const modal = document.getElementById('addProductModal');
-    const modalContent = modal.querySelector('.modal-content');
-
-    // Remove show class for animation
-    modalContent.classList.remove('show');
+    document.body.appendChild(notification);
 
     setTimeout(() => {
-        modal.style.display = 'none';
-        document.getElementById('addProductForm').reset();
-    }, 300);
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
 }
 
-// Add similar enhanced show/hide for other modals...
-function showUpdateProduct() {
-    const modal = document.getElementById('updateProductModal');
-    const modalContent = modal.querySelector('.modal-content');
-    modal.style.display = 'block';
-
-    // Force reflow
-    modal.offsetHeight;
-
-    // Add show class for animation
-    setTimeout(() => {
-        modalContent.classList.add('show');
-    }, 10);
-}
-
-function hideUpdateProduct() {
-    const modal = document.getElementById('updateProductModal');
-    const modalContent = modal.querySelector('.modal-content');
-
-    // Remove show class for animation
-    modalContent.classList.remove('show');
-
-    setTimeout(() => {
-        modal.style.display = 'none';
-        document.getElementById('updateProductSelect').value = '';
-        document.getElementById('updateProductForm').style.display = 'none';
-        document.getElementById('updateProductForm').reset();
-    }, 300);
-}
-
-function showDeleteProduct() {
-    const modal = document.getElementById('deleteProductModal');
-    const modalContent = modal.querySelector('.modal-content');
-    modal.style.display = 'block';
-
-    // Force reflow
-    modal.offsetHeight;
-
-    // Add show class for animation
-    setTimeout(() => {
-        modalContent.classList.add('show');
-    }, 10);
-}
-
-function hideDeleteProduct() {
-    const modal = document.getElementById('deleteProductModal');
-    const modalContent = modal.querySelector('.modal-content');
-
-    // Remove show class for animation
-    modalContent.classList.remove('show');
-
-    setTimeout(() => {
-        modal.style.display = 'none';
-        document.getElementById('deleteProductSelect').value = '';
-        document.getElementById('deleteWarning').style.display = 'none';
-        document.querySelector('.confirm-delete-btn').style.display = 'none';
-    }, 300);
-}
-
-// Close modals when clicking outside (updated for centered modals)
+// Close modals when clicking outside
 window.onclick = function (event) {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         if (event.target === modal) {
-            const modalContent = modal.querySelector('.modal-content');
-            modalContent.classList.remove('show');
-
-            setTimeout(() => {
-                modal.style.display = 'none';
-                // Reset forms based on which modal is closing
-                if (modal.id === 'addProductModal') {
-                    document.getElementById('addProductForm').reset();
-                } else if (modal.id === 'updateProductModal') {
-                    document.getElementById('updateProductSelect').value = '';
-                    document.getElementById('updateProductForm').style.display = 'none';
-                    document.getElementById('updateProductForm').reset();
-                } else if (modal.id === 'deleteProductModal') {
-                    document.getElementById('deleteProductSelect').value = '';
-                    document.getElementById('deleteWarning').style.display = 'none';
-                    document.querySelector('.confirm-delete-btn').style.display = 'none';
-                }
-            }, 300);
+            if (modal.id === 'addProductModal') hideAddProduct();
+            if (modal.id === 'updateProductModal') hideUpdateProduct();
+            if (modal.id === 'deleteProductModal') hideDeleteProduct();
         }
     });
 }
-
-// Initialize product management when page loads
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('Admin dashboard loaded');
-    initializeProductManagement();
-
-    // Add CSS for smooth transitions
-    const style = document.createElement('style');
-    style.textContent = `
-        .modal-content {
-            transition: all 0.3s ease-in-out;
-        }
-    `;
-    document.head.appendChild(style);
-});
-
-// Add CSS transitions to modal content
-const style = document.createElement('style');
-style.textContent = `
-    .modal-content {
-        transition: all 0.3s ease-in-out;
-        transform: scale(0.9);
-        opacity: 0;
-    }
-`;
-document.head.appendChild(style);
 
 // Make functions globally available
 window.showAddProduct = showAddProduct;
