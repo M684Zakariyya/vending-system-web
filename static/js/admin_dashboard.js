@@ -139,7 +139,8 @@ function addNewProduct() {
 
     showLoading();
 
-    fetch('/admin/add-product/', {
+    // FIXED: Use consistent URL without trailing slash
+    fetch('/admin/add-product', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -149,8 +150,14 @@ function addNewProduct() {
     })
         .then(response => {
             console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+
             if (!response.ok) {
-                throw new Error('Network response was not ok: ' + response.status);
+                // Get more details about the error
+                return response.text().then(text => {
+                    console.error('Response text:', text);
+                    throw new Error(`Network response was not ok: ${response.status} - ${response.statusText}`);
+                });
             }
             return response.json();
         })
@@ -158,11 +165,11 @@ function addNewProduct() {
             console.log('Add product result:', result);
             hideLoading();
             if (result.success) {
-                showNotification('Product added successfully!', 'success');
+                showNotification(result.message || 'Product added successfully!', 'success');
                 hideAddProduct();
                 refreshDashboard();
             } else {
-                showNotification('Error: ' + result.message, 'error');
+                showNotification('Error: ' + (result.message || 'Unknown error'), 'error');
             }
         })
         .catch(error => {
@@ -186,7 +193,8 @@ function updateExistingProduct() {
 
     showLoading();
 
-    fetch('/admin/update-product/', {
+    // FIXED: Use consistent URL without trailing slash
+    fetch('/admin/update-product', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -230,7 +238,8 @@ function confirmDelete() {
     console.log('Deleting product:', productId);
     showLoading();
 
-    fetch('/admin/delete-product/', {
+    // FIXED: Use consistent URL without trailing slash
+    fetch('/admin/delete-product', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -265,11 +274,17 @@ function confirmDelete() {
 
 // Utility Functions
 function showLoading() {
-    document.getElementById('loadingOverlay').style.display = 'flex';
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'flex';
+    }
 }
 
 function hideLoading() {
-    document.getElementById('loadingOverlay').style.display = 'none';
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+    }
 }
 
 function getCSRFToken() {
@@ -297,38 +312,73 @@ function refreshDashboard() {
 
 // Form validation
 function validateProductForm(data) {
+    console.log('Validating form data:', data);
+
+    // Check for empty fields
     if (!data.product_id || !data.name || !data.price || !data.stock || !data.max_stock || !data.min_stock) {
-        showNotification('Please fill in all required fields', 'error');
+        const missing = [];
+        if (!data.product_id) missing.push('Product ID');
+        if (!data.name) missing.push('Product Name');
+        if (!data.price) missing.push('Price');
+        if (!data.stock) missing.push('Stock');
+        if (!data.max_stock) missing.push('Max Stock');
+        if (!data.min_stock) missing.push('Min Stock');
+
+        showNotification(`Please fill in all required fields: ${missing.join(', ')}`, 'error');
         return false;
     }
 
-    if (parseFloat(data.price) <= 0) {
-        showNotification('Price must be greater than 0', 'error');
+    // Validate product ID format
+    if (data.product_id.trim() === '') {
+        showNotification('Product ID cannot be empty', 'error');
         return false;
     }
 
-    if (parseInt(data.stock) < 0) {
-        showNotification('Stock cannot be negative', 'error');
+    // Validate product name
+    if (data.name.trim() === '') {
+        showNotification('Product name cannot be empty', 'error');
         return false;
     }
 
-    if (parseInt(data.max_stock) <= 0) {
-        showNotification('Max stock must be greater than 0', 'error');
-        return false;
-    }
+    // Validate numeric fields
+    try {
+        const price = parseFloat(data.price);
+        const stock = parseInt(data.stock);
+        const maxStock = parseInt(data.max_stock);
+        const minStock = parseInt(data.min_stock);
 
-    if (parseInt(data.min_stock) < 0) {
-        showNotification('Min stock cannot be negative', 'error');
-        return false;
-    }
+        if (isNaN(price) || price <= 0) {
+            showNotification('Price must be a number greater than 0', 'error');
+            return false;
+        }
 
-    if (parseInt(data.stock) > parseInt(data.max_stock)) {
-        showNotification('Current stock cannot exceed max stock', 'error');
-        return false;
-    }
+        if (isNaN(stock) || stock < 0) {
+            showNotification('Stock must be a non-negative number', 'error');
+            return false;
+        }
 
-    if (parseInt(data.min_stock) > parseInt(data.max_stock)) {
-        showNotification('Min stock cannot exceed max stock', 'error');
+        if (isNaN(maxStock) || maxStock <= 0) {
+            showNotification('Max stock must be a number greater than 0', 'error');
+            return false;
+        }
+
+        if (isNaN(minStock) || minStock < 0) {
+            showNotification('Min stock must be a non-negative number', 'error');
+            return false;
+        }
+
+        if (stock > maxStock) {
+            showNotification('Current stock cannot exceed max stock', 'error');
+            return false;
+        }
+
+        if (minStock > maxStock) {
+            showNotification('Min stock cannot exceed max stock', 'error');
+            return false;
+        }
+
+    } catch (error) {
+        showNotification('Invalid number format in form fields', 'error');
         return false;
     }
 
@@ -351,18 +401,55 @@ function showNotification(message, type = 'info') {
         font-weight: bold;
         z-index: 10000;
         color: white;
-        ${type === 'success' ? 'background: rgba(0, 255, 0, 0.8);' : ''}
-        ${type === 'error' ? 'background: rgba(255, 0, 0, 0.8);' : ''}
-        ${type === 'info' ? 'background: rgba(0, 243, 255, 0.8);' : ''}
+        ${type === 'success' ? 'background: rgba(0, 255, 0, 0.8); border: 2px solid #00ff00;' : ''}
+        ${type === 'error' ? 'background: rgba(255, 0, 0, 0.8); border: 2px solid #ff0000;' : ''}
+        ${type === 'info' ? 'background: rgba(0, 243, 255, 0.8); border: 2px solid var(--neon-blue);' : ''}
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        animation: slideInRight 0.5s ease forwards;
     `;
 
     document.body.appendChild(notification);
 
     setTimeout(() => {
         if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
+            notification.style.animation = 'slideOutRight 0.5s ease forwards';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 500);
         }
     }, 3000);
+}
+
+// Add CSS animations for notifications
+if (!document.getElementById('notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 // Close modals when clicking outside
@@ -377,6 +464,15 @@ window.onclick = function (event) {
     });
 }
 
+// Close modals with Escape key
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        hideAddProduct();
+        hideUpdateProduct();
+        hideDeleteProduct();
+    }
+});
+
 // Make functions globally available
 window.showAddProduct = showAddProduct;
 window.hideAddProduct = hideAddProduct;
@@ -387,3 +483,5 @@ window.hideDeleteProduct = hideDeleteProduct;
 window.loadProductData = loadProductData;
 window.confirmDelete = confirmDelete;
 window.refreshDashboard = refreshDashboard;
+
+console.log('Admin dashboard JavaScript loaded successfully');

@@ -250,31 +250,48 @@ def process_payment(request):
     
     return JsonResponse({'success': False})
 
-# ADMIN PRODUCT MANAGEMENT FUNCTIONS
+# ADMIN PRODUCT MANAGEMENT FUNCTIONS - FIXED VERSION
 @login_required
 @user_passes_test(is_admin)
 @csrf_exempt
 def add_product(request):
+    print(f"Add product view called. Method: {request.method}")  # Debug
+    print(f"User: {request.user}, Is staff: {request.user.is_staff}")  # Debug
+    
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            print("Received data:", data)
+            # Parse JSON data
+            try:
+                data = json.loads(request.body)
+                print("Received JSON data:", data)
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {e}")
+                return JsonResponse({'success': False, 'message': 'Invalid JSON data'})
             
-            product_id = data.get('product_id')
-            name = data.get('name')
+            product_id = data.get('product_id', '').strip()
+            name = data.get('name', '').strip()
             price = data.get('price')
             stock = data.get('stock')
             max_stock = data.get('max_stock')
             min_stock = data.get('min_stock')
             category = data.get('category', 'snacks')
             
+            print(f"Parsed data - ID: {product_id}, Name: {name}, Price: {price}")  # Debug
+            
             # Validate required fields
             if not all([product_id, name, price, stock, max_stock, min_stock]):
-                return JsonResponse({'success': False, 'message': 'All fields are required'})
+                missing = []
+                if not product_id: missing.append('product_id')
+                if not name: missing.append('name')
+                if not price: missing.append('price')
+                if not stock: missing.append('stock')
+                if not max_stock: missing.append('max_stock')
+                if not min_stock: missing.append('min_stock')
+                return JsonResponse({'success': False, 'message': f'Missing fields: {", ".join(missing)}'})
             
             # Check if product ID already exists
             if Product.objects.filter(product_id=product_id).exists():
-                return JsonResponse({'success': False, 'message': 'Product ID already exists'})
+                return JsonResponse({'success': False, 'message': f'Product ID "{product_id}" already exists'})
             
             # Convert to proper types
             try:
@@ -282,8 +299,23 @@ def add_product(request):
                 stock = int(stock)
                 max_stock = int(max_stock)
                 min_stock = int(min_stock)
-            except (ValueError, TypeError):
+            except (ValueError, TypeError) as e:
+                print(f"Number conversion error: {e}")  # Debug
                 return JsonResponse({'success': False, 'message': 'Invalid number format'})
+            
+            # Validate numeric values
+            if price <= 0:
+                return JsonResponse({'success': False, 'message': 'Price must be greater than 0'})
+            if stock < 0:
+                return JsonResponse({'success': False, 'message': 'Stock cannot be negative'})
+            if max_stock <= 0:
+                return JsonResponse({'success': False, 'message': 'Max stock must be greater than 0'})
+            if min_stock < 0:
+                return JsonResponse({'success': False, 'message': 'Min stock cannot be negative'})
+            if stock > max_stock:
+                return JsonResponse({'success': False, 'message': 'Current stock cannot exceed max stock'})
+            if min_stock > max_stock:
+                return JsonResponse({'success': False, 'message': 'Min stock cannot exceed max stock'})
             
             # Create new product
             product = Product.objects.create(
@@ -296,15 +328,99 @@ def add_product(request):
                 category=category
             )
             
-            print(f"Product created: {product}")
-            return JsonResponse({'success': True, 'message': 'Product added successfully'})
+            print(f"Product created successfully: {product}")  # Debug
+            return JsonResponse({
+                'success': True, 
+                'message': f'Product "{name}" added successfully!',
+                'product_id': product_id
+            })
             
         except Exception as e:
-            print(f"Error adding product: {str(e)}")
+            print(f"Error adding product: {str(e)}")  # Debug
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}")  # Detailed error
+            return JsonResponse({'success': False, 'message': f'Server error: {str(e)}'})
+    
+    # If not POST request
+    return JsonResponse({'success': False, 'message': 'Only POST requests are allowed'})
+
+@login_required
+@user_passes_test(is_admin)
+@csrf_exempt
+def update_product(request):
+    print(f"Update product view called. Method: {request.method}")  # Debug
+    
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            print("Update product data:", data)
+            
+            product_id = data.get('product_id')
+            
+            if not product_id:
+                return JsonResponse({'success': False, 'message': 'Product ID is required'})
+            
+            # Get existing product
+            product = get_object_or_404(Product, product_id=product_id)
+            
+            # Update fields
+            if 'name' in data:
+                product.name = data['name'].strip()
+            
+            # Convert numeric fields
+            try:
+                if 'price' in data:
+                    product.price = float(data['price'])
+                if 'stock' in data:
+                    product.stock = int(data['stock'])
+                if 'max_stock' in data:
+                    product.max_stock = int(data['max_stock'])
+                if 'min_stock' in data:
+                    product.min_stock = int(data['min_stock'])
+            except (ValueError, TypeError):
+                return JsonResponse({'success': False, 'message': 'Invalid number format'})
+            
+            if 'category' in data:
+                product.category = data['category']
+            
+            product.save()
+            
+            return JsonResponse({'success': True, 'message': 'Product updated successfully'})
+            
+        except Exception as e:
+            print(f"Error updating product: {str(e)}")
             return JsonResponse({'success': False, 'message': str(e)})
     
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
+@login_required
+@user_passes_test(is_admin)
+@csrf_exempt
+def delete_product(request):
+    print(f"Delete product view called. Method: {request.method}")  # Debug
+    
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            print("Delete product data:", data)
+            
+            product_id = data.get('product_id')
+            
+            if not product_id:
+                return JsonResponse({'success': False, 'message': 'Product ID is required'})
+            
+            # Get and delete product
+            product = get_object_or_404(Product, product_id=product_id)
+            product_name = product.name
+            product.delete()
+            
+            return JsonResponse({'success': True, 'message': f'Product "{product_name}" deleted successfully'})
+            
+        except Exception as e:
+            print(f"Error deleting product: {str(e)}")
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
 @login_required
 @user_passes_test(is_admin)
 @csrf_exempt
