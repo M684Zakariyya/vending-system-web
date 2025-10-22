@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="money-display">
+    <div class="money-card cyber-border">
+        <h3>Total Money</h3>
+        <div id="totalMoney" class="money-value">Rs 0.00</div>
+    </div>
+    <div class="money-card cyber-border">
+        <h3>Total Expenses</h3>
+        <div id="totalExpenses" class="money-value">Rs 0.00</div>
+    </div>
+    <div class="money-card cyber-border">
+        <h3>Total Change</h3>
+        <div id="totalChange" class="money-value">Rs 0.00</div>
+    </div>
+</div>
+
+<div class="categories">
+    <div class="category cyber-border">
+        <h3>Snacks</h3>
+        <div class="product-grid">
+            {% for snack in snacks %}
+            <div class="product-card cyber-border">
+                <div class="product-info">
+                    <div><strong>ID:</strong> {{ snack.product_id }}</div>
+                    <div><strong>Name:</strong> {{ snack.name }}</div>
+                    <div><strong>Price:</strong> Rs {{ snack.price }}</div>
+                    <div><strong>Qty Left:</strong> {{ snack.stock }}</div>
+                </div>
+                <div class="product-controls">
+                    <input type="number" id="qty-{{ snack.product_id }}" min="1" max="{{ snack.stock }}" value="1"
+                        class="quantity-input">
+                    <button class="btn add-to-cart-btn" onclick="addToCart('{{ snack.product_id }}')">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-products">No snacks available</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="category cyber-border">
+        <h3>Drinks</h3>
+        <div class="product-grid">
+            {% for drink in drinks %}
+            <div class="product-card cyber-border">
+                <div class="product-info">
+                    <div><strong>ID:</strong> {{ drink.product_id }}</div>
+                    <div><strong>Name:</strong> {{ drink.name }}</div>
+                    <div><strong>Price:</strong> Rs {{ drink.price }}</div>
+                    <div><strong>Qty Left:</strong> {{ drink.stock }}</div>
+                </div>
+                <div class="product-controls">
+                    <input type="number" id="qty-{{ drink.product_id }}" min="1" max="{{ drink.stock }}" value="1"
+                        class="quantity-input">
+                    <button class="btn add-to-cart-btn" onclick="addToCart('{{ drink.product_id }}')">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-products">No drinks available</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="controls">
+    <button class="btn cyber-btn" id="addFundsBtn">Add Funds</button>
+    <button class="btn cyber-btn" id="viewCartBtn">View Cart</button>
+    <button class="btn cyber-btn" id="clearCartBtn">Clear Cart</button>
+    <button class="btn cyber-btn withdraw-btn" id="withdrawMoneyBtn">Withdraw Money</button>
+    <button class="btn cyber-btn" id="purchaseBtn">Purchase</button>
+</div>
+
+<!-- Add Funds Modal -->
+<div id="addFundsModal" class="modal">
+    <div class="modal-content cyber-border">
+        <span class="close" onclick="hideAddFunds()">&times;</span>
+        <h3>Add Funds</h3>
+        <div class="money-buttons">
+            <button class="money-btn" onclick="addFunds('rs1')">Rs 1</button>
+            <button class="money-btn" onclick="addFunds('rs5')">Rs 5</button>
+            <button class="money-btn" onclick="addFunds('rs10')">Rs 10</button>
+            <button class="money-btn" onclick="addFunds('rs20')">Rs 20</button>
+            <button class="money-btn" onclick="addFunds('rs25')">Rs 25</button>
+            <button class="money-btn" onclick="addFunds('rs50')">Rs 50</button>
+            <button class="money-btn" onclick="addFunds('rs100')">Rs 100</button>
+            <button class="money-btn" onclick="addFunds('rs200')">Rs 200</button>
+        </div>
+        <div class="current-funds">
+            <h4>Current Funds: <span id="currentFunds">Rs 0.00</span></h4>
+        </div>
+    </div>
+</div>
+
+<!-- Cart Modal -->
+<div id="cartModal" class="modal">
+    <div class="modal-content cyber-border">
+        <span class="close" onclick="hideCart()">&times;</span>
+        <h3>Your Cart</h3>
+        <div id="cartContent">
+            <!-- Cart items will be loaded here -->
+        </div>
+        <div class="cart-total">
+            <h4>Total: <span id="cartTotal">Rs 0.00</span></h4>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/vending.js' %}"></script>
+<script>
+    // Additional initialization
+    document.addEventListener('DOMContentLoaded', function () {
+        // Add event listeners to main buttons
+        document.getElementById('addFundsBtn').onclick = showAddFunds;
+        document.getElementById('viewCartBtn').onclick = viewCart;
+        document.getElementById('clearCartBtn').onclick = showClearCartConfirmation;
+        document.getElementById('withdrawMoneyBtn').onclick = showWithdrawMoneyConfirmation;
+        document.getElementById('purchaseBtn').onclick = processPayment;
+
+        console.log('Button event listeners attached');
+    });
+</script>
+{% endblock %}

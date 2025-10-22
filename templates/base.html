@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASTRO Vending Machine</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    <!-- Page-specific CSS -->
+    {% if request.path == '/' %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    {% elif 'admin-dashboard' in request.path %}
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+    {% elif 'admin-login' in request.path %}
+    <link rel="stylesheet" href="{% static 'css/admin_login.css' %}">
+    {% elif 'admin-logout' in request.path %}
+    <link rel="stylesheet" href="{% static 'css/admin_logout.css' %}">
+    {% elif 'about' in request.path %}
+    <link rel="stylesheet" href="{% static 'css/about.css' %}">
+    {% elif 'ideas' in request.path %}
+    <link rel="stylesheet" href="{% static 'css/ideas.css' %}">
+    {% endif %}
+</head>
+
+<body>
+    <nav class="navbar cyber-border">
+        <div class="logo" id="astroLogo">ASTRO</div>
+        <ul class="nav-links">
+            <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
+            <li><a href="{% url 'about' %}" class="{% if request.path == '/about/' %}active{% endif %}">About</a></li>
+            <li><a href="{% url 'ideas' %}" class="{% if request.path == '/ideas/' %}active{% endif %}">Ideas</a></li>
+            <li><a href="{% url 'admin_login' %}">Admin</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- Display messages -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="global-message global-message-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmationModal" class="confirmation-modal">
+        <div class="confirmation-content cyber-border">
+            <h3 id="confirmationTitle">Confirm Action</h3>
+            <p id="confirmationMessage">Are you sure you want to proceed?</p>
+            <div class="confirmation-buttons">
+                <button id="confirmAction" class="confirm-btn">Yes, Confirm</button>
+                <button id="cancelAction" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

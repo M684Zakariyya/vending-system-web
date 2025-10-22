@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="logout-container">
+    <div class="logout-form cyber-border">
+        <div class="logout-header">
+            <h2>CONFIRM LOGOUT</h2>
+            <p>Secure Session Termination</p>
+        </div>
+
+        <div class="logout-warning">
+            <div class="warning-icon">⚠️</div>
+            <h3>Are you sure you want to logout?</h3>
+            <p>You will be redirected to the vending machine home page and your admin session will be terminated.</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="logout-actions">
+                <button type="submit" class="btn cyber-btn confirm-logout">
+                    YES, LOGOUT
+                </button>
+                <a href="{% url 'admin_dashboard' %}" class="btn cyber-btn cancel-logout">
+                    CANCEL
+                </a>
+            </div>
+        </form>
+
+        <div class="logout-footer">
+            <p>ASTRO Admin System • Secure Access Portal</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

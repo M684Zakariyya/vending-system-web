@@ -1,0 +1,477 @@
+/* Admin Dashboard Styles */
+.admin-dashboard {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, var(--darker-bg), rgba(0, 243, 255, 0.1));
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.dashboard-header h1 {
+    color: var(--neon-blue);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    text-shadow: var(--text-glow);
+    background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dashboard-header p {
+    color: var(--neon-pink);
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.logout-btn {
+    background: rgba(255, 0, 0, 0.1);
+    border-color: #ff0000;
+    color: #ff0000;
+}
+
+.logout-btn:hover {
+    background: #ff0000;
+    color: white;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 243, 255, 0.2);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.stat-info h3 {
+    color: var(--neon-green);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-value {
+    color: var(--neon-blue);
+    font-size: 2rem;
+    font-weight: bold;
+    text-shadow: var(--text-glow);
+}
+
+/* Dashboard Sections */
+.dashboard-section {
+    margin-bottom: 3rem;
+}
+
+.dashboard-section h2 {
+    color: var(--neon-blue);
+    margin-bottom: 1.5rem;
+    text-shadow: var(--text-glow);
+    border-bottom: 2px solid var(--neon-blue);
+    padding-bottom: 0.5rem;
+}
+
+/* Sales Grid */
+.sales-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.sales-card {
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.sales-card:hover {
+    transform: scale(1.05);
+}
+
+.sales-card h3 {
+    color: var(--neon-pink);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sales-value {
+    color: var(--neon-green);
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-shadow: var(--text-glow);
+}
+
+.sales-count {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+/* Products Management */
+.products-management-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.management-card {
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.management-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 243, 255, 0.2);
+}
+
+.management-card h3 {
+    color: var(--neon-blue);
+    margin-bottom: 1rem;
+    text-shadow: var(--text-glow);
+}
+
+.management-card p {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+/* Transactions Table */
+.transactions-table {
+    padding: 1.5rem;
+    overflow-x: auto;
+}
+
+.transactions-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.transactions-table th {
+    background: rgba(0, 243, 255, 0.1);
+    color: var(--neon-blue);
+    padding: 1rem;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--neon-blue);
+}
+
+.transactions-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.transactions-table tr:hover {
+    background: rgba(0, 243, 255, 0.05);
+}
+
+.products-cell {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Transaction Type Badges */
+.transaction-type {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.transaction-type.purchase {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+.transaction-type.withdrawal {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+    border: 1px solid #ffa500;
+    box-shadow: 0 0 10px rgba(255, 165, 0, 0.3);
+}
+
+/* Products Grid */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.product-card {
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.product-header h4 {
+    color: var(--neon-green);
+    margin: 0;
+}
+
+.product-id {
+    color: var(--neon-blue);
+    font-family: 'Courier New', monospace;
+    background: rgba(0, 243, 255, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+}
+
+.product-stats {
+    display: grid;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.stat strong {
+    color: var(--neon-blue);
+}
+
+.stock-indicator {
+    padding: 0.5rem;
+    text-align: center;
+    border-radius: 3px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.stock-indicator.low-stock {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+    border: 1px solid #ffa500;
+}
+
+.stock-indicator:not(.low-stock) {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+    border: 1px solid #00ff00;
+}
+
+.no-products {
+    padding: 2rem;
+    text-align: center;
+    color: var(--neon-pink);
+    grid-column: 1 / -1;
+}
+
+/* Money Stats */
+.money-stats {
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.money-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(0, 243, 255, 0.05);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+}
+
+.money-stat span {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.money-stat strong {
+    color: var(--neon-green);
+    font-size: 1.1rem;
+}
+
+/* Denomination Tables */
+.denomination-tables {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+.denomination-table {
+    padding: 1.5rem;
+    overflow-x: auto;
+}
+
+.denomination-table h3 {
+    color: var(--neon-pink);
+    margin-bottom: 1rem;
+    text-align: center;
+    text-shadow: var(--text-glow);
+}
+
+.denomination-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.denomination-table th {
+    background: rgba(255, 0, 255, 0.1);
+    color: var(--neon-pink);
+    padding: 0.75rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--neon-pink);
+}
+
+.denomination-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+}
+
+.denomination-table tr:hover {
+    background: rgba(255, 0, 255, 0.05);
+}
+
+.no-data {
+    text-align: center;
+    color: var(--neon-pink);
+    padding: 2rem;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-content {
+    padding: 2rem;
+    text-align: center;
+    background: var(--darker-bg);
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(0, 243, 255, 0.3);
+    border-top: 3px solid var(--neon-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design for Admin Dashboard */
+@media (max-width: 768px) {
+    .admin-dashboard {
+        padding: 1rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+
+    .admin-controls {
+        flex-direction: column;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sales-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .transactions-table {
+        overflow-x: auto;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .products-management-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .money-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .denomination-table {
+        overflow-x: auto;
+    }
+
+    .denomination-table table {
+        font-size: 0.8rem;
+    }
+}

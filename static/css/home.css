@@ -1,0 +1,407 @@
+/* Money Display */
+.money-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.money-card {
+    padding: 1.5rem;
+    text-align: center;
+    background: var(--card-bg);
+}
+
+.money-card h3 {
+    color: var(--neon-green);
+    margin-bottom: 0.5rem;
+    text-shadow: var(--text-glow);
+}
+
+.money-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--neon-blue);
+    text-shadow: var(--text-glow);
+}
+
+/* Categories */
+.categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.category {
+    padding: 1.5rem;
+}
+
+.category h3 {
+    color: var(--neon-pink);
+    margin-bottom: 1rem;
+    text-align: center;
+    text-shadow: var(--text-glow);
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.product-card {
+    padding: 1rem;
+    background: var(--card-bg);
+    transition: all 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px var(--neon-blue);
+}
+
+.product-info {
+    margin-bottom: 1rem;
+}
+
+.product-info div {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.product-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.quantity-input {
+    background: var(--dark-bg);
+    color: white;
+    border: 1px solid var(--neon-blue);
+    padding: 0.5rem;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+}
+
+.quantity-input:focus {
+    outline: none;
+    box-shadow: 0 0 10px var(--neon-blue);
+}
+
+.add-to-cart-btn {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+}
+
+/* Controls */
+.controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 2rem 0;
+    justify-content: center;
+}
+
+.withdraw-btn {
+    background: rgba(255, 165, 0, 0.1);
+    border: 2px solid #ffa500;
+    color: #ffa500;
+}
+
+.withdraw-btn:hover {
+    background: #ffa500;
+    color: var(--dark-bg);
+    box-shadow: 0 0 20px #ffa500;
+}
+
+/* Money Buttons */
+.money-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.money-btn {
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid var(--neon-blue);
+    color: white;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.money-btn:hover {
+    background: var(--neon-blue);
+    color: var(--dark-bg);
+    box-shadow: 0 0 15px var(--neon-blue);
+}
+
+/* Modals */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+    overflow: hidden;
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--darker-bg);
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+.close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    color: var(--neon-pink);
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close:hover {
+    color: var(--neon-blue);
+    text-shadow: var(--text-glow);
+}
+
+/* Cart Styles */
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+    margin-bottom: 0.5rem;
+}
+
+.cart-item-info {
+    flex-grow: 1;
+}
+
+.cart-item-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.remove-btn {
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid #ff0000;
+    color: #ff0000;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.remove-btn:hover {
+    background: #ff0000;
+    color: white;
+    box-shadow: 0 0 10px #ff0000;
+}
+
+.cart-total {
+    text-align: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--neon-blue);
+}
+
+.cart-total h4 {
+    color: var(--neon-green);
+    text-shadow: var(--text-glow);
+}
+
+/* Custom Confirmation Modal */
+.confirmation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 3000;
+    backdrop-filter: blur(5px);
+}
+
+.confirmation-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--darker-bg);
+    padding: 2rem;
+    border: 2px solid var(--neon-pink);
+    box-shadow: 0 0 20px var(--neon-pink);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.confirmation-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.confirm-btn {
+    background: rgba(0, 255, 0, 0.1);
+    border: 2px solid #00ff00;
+    color: #00ff00;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.confirm-btn:hover {
+    background: #00ff00;
+    color: var(--dark-bg);
+    box-shadow: 0 0 15px #00ff00;
+}
+
+.cancel-btn {
+    background: rgba(255, 0, 0, 0.1);
+    border: 2px solid #ff0000;
+    color: #ff0000;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background: #ff0000;
+    color: white;
+    box-shadow: 0 0 15px #ff0000;
+}
+
+/* Withdraw Modal Styles */
+.withdraw-info {
+    text-align: center;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: rgba(255, 165, 0, 0.05);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+}
+
+.money-breakdown {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+}
+
+.denomination-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    border-bottom: 1px solid rgba(255, 165, 0, 0.2);
+}
+
+.denomination-item:last-child {
+    border-bottom: none;
+}
+
+.denomination-item .count {
+    color: #ffa500;
+    font-weight: bold;
+}
+
+.withdraw-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.confirm-withdraw-btn {
+    background: rgba(255, 165, 0, 0.1);
+    border: 2px solid #ffa500;
+    color: #ffa500;
+}
+
+.confirm-withdraw-btn:hover {
+    background: #ffa500;
+    color: var(--dark-bg);
+    box-shadow: 0 0 15px #ffa500;
+}
+
+.cancel-withdraw-btn {
+    background: rgba(255, 0, 0, 0.1);
+    border: 2px solid #ff0000;
+    color: #ff0000;
+}
+
+.cancel-withdraw-btn:hover {
+    background: #ff0000;
+    color: white;
+    box-shadow: 0 0 15px #ff0000;
+}
+
+/* Responsive Design for Home */
+@media (max-width: 768px) {
+    .categories {
+        grid-template-columns: 1fr;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .money-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .controls {
+        flex-direction: column;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 1rem;
+    }
+
+    .confirmation-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+
+    .confirmation-buttons {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .money-display {
+        grid-template-columns: 1fr;
+    }
+
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .money-buttons {
+        grid-template-columns: 1fr;
+    }
+}

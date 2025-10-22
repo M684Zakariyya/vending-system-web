@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-form cyber-border">
+        <div class="login-header">
+            <h2>ASTRO ADMIN</h2>
+            <p>Secure Access Portal</p>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required class="form-input"
+                    placeholder="Enter admin username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required class="form-input"
+                    placeholder="Enter admin password">
+            </div>
+            <button type="submit" class="btn cyber-btn login-btn">Access Dashboard</button>
+        </form>
+
+        <div class="login-footer">
+            <p>Restricted Area • Authorized Personnel Only</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

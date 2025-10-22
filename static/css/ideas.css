@@ -1,0 +1,49 @@
+/* About & Ideas Page Styles */
+.page-content {
+    padding: 2rem;
+    margin: 2rem auto;
+    max-width: 800px;
+}
+
+.page-content h2 {
+    color: var(--neon-blue);
+    text-align: center;
+    margin-bottom: 2rem;
+    text-shadow: var(--text-glow);
+}
+
+.page-content h3 {
+    color: var(--neon-pink);
+    margin: 1.5rem 0 1rem 0;
+    text-shadow: var(--text-glow);
+}
+
+.page-content ul {
+    list-style: none;
+    padding-left: 1rem;
+}
+
+.page-content li {
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    position: relative;
+}
+
+.page-content li::before {
+    content: '▹';
+    color: var(--neon-blue);
+    position: absolute;
+    left: 0;
+    text-shadow: var(--text-glow);
+}
+
+.page-content p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.about-content,
+.ideas-content {
+    padding: 1rem 0;
+}
