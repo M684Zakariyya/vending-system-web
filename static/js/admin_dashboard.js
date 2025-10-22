@@ -187,6 +187,8 @@ function addNewProduct() {
 
     showLoading();
 
+    showLoading();
+
     // FIXED: Use the correct URL
     fetch('/admin/add-product/', {
         method: 'POST',
@@ -196,6 +198,7 @@ function addNewProduct() {
         },
         body: JSON.stringify(data)
     })
+
         .then(response => {
             console.log('Response status:', response.status);
             console.log('Response URL:', response.url);
