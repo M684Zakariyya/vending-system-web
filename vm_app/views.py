@@ -1,13 +1,15 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction as db_transaction
 import json
 from .models import Product, Cart, Transaction
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Sum, Count
 
+def is_admin(user):
+    return user.is_authenticated and user.is_staff
+
+# Main page views
 def home(request):
     snacks = Product.objects.filter(category='snacks')
     drinks = Product.objects.filter(category='drinks')
@@ -20,6 +22,7 @@ def about(request):
 def ideas(request):
     return render(request, 'vm_app/ideas.html')
 
+# Money functions
 @csrf_exempt
 def add_funds(request):
     if request.method == 'POST':
@@ -45,26 +48,18 @@ def calculate_total(money_inserted):
 @csrf_exempt
 def withdraw_money(request):
     if request.method == 'POST':
-        print("Withdraw money endpoint called")  # Debug log
-        
-        # Calculate total money inserted
         money_inserted = request.session.get('money_inserted', {})
         total_money = calculate_total(money_inserted)
         
-        print(f"Money inserted: {money_inserted}")  # Debug log
-        print(f"Total money: {total_money}")  # Debug log
-        
         if total_money <= 0:
-            print("No money to withdraw")  # Debug log
             return JsonResponse({'success': False, 'message': 'No money to withdraw'})
         
         try:
-            # Create WITHDRAWAL transaction record
             transaction_obj = Transaction.objects.create(
                 total_amount=total_money,
-                total_expenses=0,  # No expenses for withdrawal
-                total_change=total_money,  # All money is returned as change
-                transaction_type='withdrawal',  # Mark as withdrawal
+                total_expenses=0,
+                total_change=total_money,
+                transaction_type='withdrawal',
                 rs1=money_inserted.get('rs1', 0),
                 rs5=money_inserted.get('rs5', 0),
                 rs10=money_inserted.get('rs10', 0),
@@ -73,7 +68,6 @@ def withdraw_money(request):
                 rs50=money_inserted.get('rs50', 0),
                 rs100=money_inserted.get('rs100', 0),
                 rs200=money_inserted.get('rs200', 0),
-                # Return the same money as change
                 change_rs1=money_inserted.get('rs1', 0),
                 change_rs5=money_inserted.get('rs5', 0),
                 change_rs10=money_inserted.get('rs10', 0),
@@ -85,14 +79,9 @@ def withdraw_money(request):
                 products_purchased='MONEY_WITHDRAWAL'
             )
             
-            print(f"Withdrawal transaction created: {transaction_obj.transaction_id}")  # Debug log
-            
-            # Clear the session money
             if 'money_inserted' in request.session:
                 del request.session['money_inserted']
             request.session.modified = True
-            
-            print("Session money cleared")  # Debug log
             
             return JsonResponse({
                 'success': True,
@@ -102,11 +91,11 @@ def withdraw_money(request):
             })
             
         except Exception as e:
-            print(f"Error creating withdrawal transaction: {str(e)}")  # Debug log
             return JsonResponse({'success': False, 'message': str(e)})
     
-    print("Invalid request method for withdrawal")  # Debug log
     return JsonResponse({'success': False, 'message': 'Invalid request'})
+
+# Cart functions
 @csrf_exempt
 def add_to_cart(request):
     if request.method == 'POST':
@@ -181,6 +170,15 @@ def remove_from_cart(request):
             return JsonResponse({'success': False, 'message': 'Item not in cart'})
 
 @csrf_exempt
+def clear_cart(request):
+    if request.method == 'POST':
+        if not request.session.session_key:
+            return JsonResponse({'success': False, 'message': 'No cart found'})
+        
+        Cart.objects.filter(session_key=request.session.session_key).delete()
+        return JsonResponse({'success': True})
+
+@csrf_exempt
 def process_payment(request):
     if request.method == 'POST':
         try:
@@ -219,7 +217,7 @@ def process_payment(request):
                     total_amount=money_inserted,
                     total_expenses=total_cost,
                     total_change=money_inserted - total_cost,
-                    transaction_type='purchase',  # Mark as purchase
+                    transaction_type='purchase',
                     products_purchased=', '.join(purchased_products)
                 )
 
@@ -239,87 +237,9 @@ def process_payment(request):
     
     return JsonResponse({'success': False})
 
-@csrf_exempt
-def clear_cart(request):
-    if request.method == 'POST':
-        if not request.session.session_key:
-            return JsonResponse({'success': False, 'message': 'No cart found'})
-        
-        Cart.objects.filter(session_key=request.session.session_key).delete()
-        return JsonResponse({'success': True})
-    
-@csrf_exempt
-def admin_stats(request):
-    if not request.user.is_authenticated or not request.user.is_staff:
-        return JsonResponse({'error': 'Unauthorized'}, status=401)
-    
-    # Sales data for charts
-    today = timezone.now().date()
-    dates = []
-    sales_data = []
-    transactions_data = []
-    
-    for i in range(7, -1, -1):
-        date = today - timedelta(days=i)
-        dates.append(date.strftime('%m/%d'))
-        
-        day_sales = Transaction.objects.filter(date=date).aggregate(
-            sales=Sum('total_expenses'),
-            transactions=Count('transaction_id')  # FIXED: Use transaction_id
-        )
-        
-        sales_data.append(float(day_sales['sales'] or 0))
-        transactions_data.append(day_sales['transactions'] or 0)
-    
-    # Product category sales - Simplified version
-    snacks_sales = 0
-    drinks_sales = 0
-    
-    # Calculate category sales from transactions
-    transactions = Transaction.objects.all()
-    for transaction in transactions:
-        # Simple categorization - in real app you'd parse products_purchased properly
-        if 'snack' in transaction.products_purchased.lower() or 'chips' in transaction.products_purchased.lower() or 'chocolate' in transaction.products_purchased.lower():
-            snacks_sales += float(transaction.total_expenses)
-        elif 'drink' in transaction.products_purchased.lower() or 'cola' in transaction.products_purchased.lower() or 'water' in transaction.products_purchased.lower() or 'juice' in transaction.products_purchased.lower():
-            drinks_sales += float(transaction.total_expenses)
-        else:
-            # Default to snacks if we can't determine
-            snacks_sales += float(transaction.total_expenses)
-    
-    category_sales = [
-        {'category': 'snacks', 'total_sales': snacks_sales},
-        {'category': 'drinks', 'total_sales': drinks_sales}
-    ]
-    
-    # Money denomination stats
-    denomination_stats = {
-        'rs1': Transaction.objects.aggregate(total=Sum('rs1'))['total'] or 0,
-        'rs5': Transaction.objects.aggregate(total=Sum('rs5'))['total'] or 0,
-        'rs10': Transaction.objects.aggregate(total=Sum('rs10'))['total'] or 0,
-        'rs20': Transaction.objects.aggregate(total=Sum('rs20'))['total'] or 0,
-        'rs25': Transaction.objects.aggregate(total=Sum('rs25'))['total'] or 0,
-        'rs50': Transaction.objects.aggregate(total=Sum('rs50'))['total'] or 0,
-        'rs100': Transaction.objects.aggregate(total=Sum('rs100'))['total'] or 0,
-        'rs200': Transaction.objects.aggregate(total=Sum('rs200'))['total'] or 0,
-    }
-    
-    return JsonResponse({
-        'sales_chart': {
-            'dates': dates,
-            'sales': sales_data,
-            'transactions': transactions_data,
-        },
-        'category_sales': category_sales,
-        'denomination_stats': denomination_stats,
-    })
-
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .models import Product
-import json
-
+# Admin product management functions (you already have these)
+@login_required
+@user_passes_test(is_admin)
 @csrf_exempt
 def add_product(request):
     if request.method == 'POST':
@@ -332,6 +252,10 @@ def add_product(request):
             max_stock = data.get('max_stock')
             min_stock = data.get('min_stock')
             category = data.get('category', 'snacks')
+            
+            # Validate required fields
+            if not all([product_id, name, price, stock, max_stock, min_stock]):
+                return JsonResponse({'success': False, 'message': 'All fields are required'})
             
             # Check if product ID already exists
             if Product.objects.filter(product_id=product_id).exists():
@@ -355,12 +279,17 @@ def add_product(request):
     
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
+@login_required
+@user_passes_test(is_admin)
 @csrf_exempt
 def update_product(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             product_id = data.get('product_id')
+            
+            if not product_id:
+                return JsonResponse({'success': False, 'message': 'Product ID is required'})
             
             # Get existing product
             product = get_object_or_404(Product, product_id=product_id)
@@ -382,12 +311,17 @@ def update_product(request):
     
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
+@login_required
+@user_passes_test(is_admin)
 @csrf_exempt
 def delete_product(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             product_id = data.get('product_id')
+            
+            if not product_id:
+                return JsonResponse({'success': False, 'message': 'Product ID is required'})
             
             # Get and delete product
             product = get_object_or_404(Product, product_id=product_id)

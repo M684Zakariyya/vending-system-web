@@ -17,9 +17,7 @@
     <link rel="stylesheet" href="{% static 'css/admin_login.css' %}">
     {% elif 'admin-logout' in request.path %}
     <link rel="stylesheet" href="{% static 'css/admin_logout.css' %}">
-    {% elif 'about' in request.path %}
-    <link rel="stylesheet" href="{% static 'css/about.css' %}">
-    {% elif 'ideas' in request.path %}
+    {% elif 'about' in request.path or 'ideas' in request.path %}
     <link rel="stylesheet" href="{% static 'css/ideas.css' %}">
     {% endif %}
 </head>
@@ -52,8 +50,9 @@
     <!-- Notification Container -->
     <div class="notification-container" id="notificationContainer"></div>
 
-    <!-- Custom Confirmation Modal -->
-    <div id="confirmationModal" class="confirmation-modal">
+    <!-- Custom Confirmation Modal - Only include on pages that need it -->
+    {% if request.path == '/' or 'admin-dashboard' in request.path %}
+    <div id="confirmationModal" class="confirmation-modal" style="display: none;">
         <div class="confirmation-content cyber-border">
             <h3 id="confirmationTitle">Confirm Action</h3>
             <p id="confirmationMessage">Are you sure you want to proceed?</p>
@@ -63,8 +62,17 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <script src="{% static 'js/main.js' %}"></script>
+
+    <!-- Load page-specific JavaScript -->
+    {% if request.path == '/' %}
+    <script src="{% static 'js/vending.js' %}"></script>
+    {% elif 'admin-dashboard' in request.path %}
+    <script src="{% static 'js/admin_dashboard.js' %}"></script>
+    {% endif %}
+
     {% block extra_js %}{% endblock %}
 </body>
 
