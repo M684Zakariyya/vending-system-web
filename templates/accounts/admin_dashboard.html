@@ -49,7 +49,151 @@
         color: #ffa500;
     }
 
+    /* Enhanced Container Styles */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-box {
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: var(--darker-bg);
+        border: 2px solid var(--neon-blue);
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        border-radius: 8px;
+    }
+
+    .stat-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 243, 255, 0.3);
+    }
+
+    .stat-box h3 {
+        color: var(--neon-green);
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-value {
+        color: var(--neon-blue);
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-shadow: var(--text-glow);
+        margin: 0.5rem 0;
+    }
+
+    .stat-subtext {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Sales Overview Container */
+    .sales-container {
+        background: var(--darker-bg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px solid var(--neon-pink);
+        box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
+        border-radius: 8px;
+    }
+
+    .sales-container h2 {
+        color: var(--neon-pink);
+        margin-bottom: 1.5rem;
+        text-shadow: var(--text-glow);
+        border-bottom: 2px solid var(--neon-pink);
+        padding-bottom: 0.5rem;
+    }
+
+    .sales-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .sales-card {
+        padding: 1.5rem;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 0, 255, 0.3);
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .sales-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 20px rgba(255, 0, 255, 0.3);
+    }
+
+    .sales-card h4 {
+        color: var(--neon-pink);
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .sales-amount {
+        color: var(--neon-green);
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        text-shadow: var(--text-glow);
+    }
+
+    .sales-count {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+
+    /* Product Management Section */
+    .management-container {
+        background: var(--darker-bg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px solid var(--neon-blue);
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        border-radius: 8px;
+    }
+
+    .management-container h2 {
+        color: var(--neon-blue);
+        margin-bottom: 1.5rem;
+        text-shadow: var(--text-glow);
+        border-bottom: 2px solid var(--neon-blue);
+        padding-bottom: 0.5rem;
+    }
+
+    .management-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
     /* Enhanced Table Styles */
+    .table-container {
+        background: var(--darker-bg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 243, 255, 0.3);
+        border-radius: 8px;
+    }
+
+    .table-container h2 {
+        color: var(--neon-pink);
+        margin-bottom: 1.5rem;
+        text-shadow: var(--text-glow);
+        border-bottom: 2px solid var(--neon-pink);
+        padding-bottom: 0.5rem;
+    }
+
     .enhanced-table {
         width: 100%;
         border-collapse: collapse;
@@ -79,32 +223,6 @@
         background: rgba(0, 243, 255, 0.05);
     }
 
-    .table-container {
-        background: var(--darker-bg);
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        border: 1px solid rgba(0, 243, 255, 0.3);
-        border-radius: 5px;
-    }
-
-    .table-container h3 {
-        color: var(--neon-pink);
-        margin-bottom: 1rem;
-        text-shadow: var(--text-glow);
-        border-bottom: 1px solid var(--neon-pink);
-        padding-bottom: 0.5rem;
-    }
-
-    .money-denomination {
-        display: inline-block;
-        background: rgba(0, 255, 0, 0.1);
-        border: 1px solid #00ff00;
-        padding: 0.25rem 0.5rem;
-        margin: 0.1rem;
-        border-radius: 3px;
-        font-size: 0.8rem;
-    }
-
     .no-data {
         text-align: center;
         color: var(--neon-pink);
@@ -121,20 +239,28 @@
 
     .product-item {
         background: rgba(255, 255, 255, 0.05);
-        padding: 1rem;
-        border-radius: 5px;
+        padding: 1.5rem;
+        border-radius: 8px;
         border: 1px solid rgba(0, 243, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .product-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 243, 255, 0.2);
     }
 
     .product-item strong {
         color: var(--neon-green);
         display: block;
         margin-bottom: 0.5rem;
+        font-size: 1.1rem;
     }
 
     .product-item span {
         color: var(--neon-blue);
         font-weight: bold;
+        font-size: 1.2rem;
     }
 
     /* Transaction type badges */
@@ -163,65 +289,218 @@
         color: #ff0000;
         border: 1px solid #ff0000;
     }
+
+    /* Status indicators */
+    .status-out {
+        color: #ff0000;
+        font-weight: bold;
+    }
+
+    .status-low {
+        color: #ffa500;
+        font-weight: bold;
+    }
+
+    .status-good {
+        color: #00ff00;
+        font-weight: bold;
+    }
+
+    /* Dashboard Header */
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--darker-bg), rgba(0, 243, 255, 0.1));
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        border-radius: 8px;
+        border: 2px solid var(--neon-blue);
+    }
+
+    .dashboard-header h1 {
+        color: var(--neon-blue);
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        text-shadow: var(--text-glow);
+        background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .dashboard-header p {
+        color: var(--neon-pink);
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 2000;
+        backdrop-filter: blur(5px);
+        overflow: hidden;
+    }
+
+    .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--darker-bg);
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+
+    .close {
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        color: var(--neon-pink);
+        font-size: 2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .close:hover {
+        color: var(--neon-blue);
+        text-shadow: var(--text-glow);
+    }
+
+    /* Form inputs */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--neon-green);
+        text-shadow: var(--text-glow);
+        font-weight: bold;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 1rem;
+        background: rgba(10, 10, 10, 0.8);
+        border: 2px solid var(--neon-blue);
+        color: white;
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+    }
+
+    .form-input:focus {
+        outline: none;
+        box-shadow: 0 0 20px var(--neon-blue);
+        border-color: var(--neon-purple);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .stats-container {
+            grid-template-columns: 1fr;
+        }
+
+        .sales-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .management-buttons {
+            flex-direction: column;
+        }
+
+        .product-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+            width: 95%;
+            padding: 1rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+        }
+    }
 </style>
 
 <!-- Loading Overlay -->
-<div id="loadingOverlay"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; color: white;">
-    <div style="font-size: 1.5rem;">Loading...</div>
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-content cyber-border">
+        <div class="loading-spinner"></div>
+        <div>Processing...</div>
+    </div>
 </div>
 
-<div class="dashboard-container">
+<div class="admin-dashboard">
     <!-- Dashboard Header -->
-    <div class="dashboard-header cyber-border">
+    <div class="dashboard-header">
         <h1>ASTRO ADMIN DASHBOARD</h1>
         <p>Vending Machine Management System</p>
+        <div class="admin-controls">
+            <a href="{% url 'admin_logout' %}" class="btn cyber-btn logout-btn">Logout</a>
+        </div>
     </div>
 
-    <!-- Stats Overview -->
-    <div class="stats-grid">
-        <div class="stat-card cyber-border">
+    <!-- Stats Overview in Containers -->
+    <div class="stats-container">
+        <div class="stat-box">
             <h3>Total Products</h3>
             <div class="stat-value">{{ total_products }}</div>
+            <div class="stat-subtext">Available Items</div>
         </div>
-        <div class="stat-card cyber-border">
+        <div class="stat-box">
             <h3>Low Stock</h3>
             <div class="stat-value">{{ low_stock_products }}</div>
+            <div class="stat-subtext">Need Restocking</div>
         </div>
-        <div class="stat-card cyber-border">
+        <div class="stat-box">
             <h3>Out of Stock</h3>
             <div class="stat-value">{{ out_of_stock_products }}</div>
+            <div class="stat-subtext">Unavailable Items</div>
         </div>
-        <div class="stat-card cyber-border">
+        <div class="stat-box">
             <h3>Total Sales</h3>
             <div class="stat-value">Rs {{ money_stats.total_sales|floatformat:2 }}</div>
+            <div class="stat-subtext">All Time Revenue</div>
         </div>
     </div>
 
-    <!-- Sales Overview -->
-    <div class="sales-section cyber-border">
+    <!-- Sales Overview Container -->
+    <div class="sales-container">
         <h2>Sales Overview</h2>
         <div class="sales-grid">
             <div class="sales-card">
                 <h4>Today</h4>
-                <p>Rs {{ daily_sales.total_sales|floatformat:2 }}</p>
-                <small>{{ daily_sales.total_transactions }} transactions</small>
+                <div class="sales-amount">Rs {{ daily_sales.total_sales|floatformat:2 }}</div>
+                <div class="sales-count">{{ daily_sales.total_transactions }} transactions</div>
             </div>
             <div class="sales-card">
                 <h4>This Week</h4>
-                <p>Rs {{ weekly_sales.total_sales|floatformat:2 }}</p>
-                <small>{{ weekly_sales.total_transactions }} transactions</small>
+                <div class="sales-amount">Rs {{ weekly_sales.total_sales|floatformat:2 }}</div>
+                <div class="sales-count">{{ weekly_sales.total_transactions }} transactions</div>
             </div>
             <div class="sales-card">
                 <h4>This Month</h4>
-                <p>Rs {{ monthly_sales.total_sales|floatformat:2 }}</p>
-                <small>{{ monthly_sales.total_transactions }} transactions</small>
+                <div class="sales-amount">Rs {{ monthly_sales.total_sales|floatformat:2 }}</div>
+                <div class="sales-count">{{ monthly_sales.total_transactions }} transactions</div>
             </div>
         </div>
     </div>
 
-    <!-- Product Management -->
-    <div class="management-section cyber-border">
+    <!-- Product Management Section -->
+    <div class="management-container">
         <h2>Product Management</h2>
         <div class="management-buttons">
             <button class="btn cyber-btn" onclick="showAddProduct()">Add Product</button>
@@ -279,10 +558,10 @@
                     <td>{{ product.category|title }}</td>
                     <td>
                         {% if product.stock == 0 %}
-                        <span style="color: #ff0000;">Out of Stock</span>
-                        {% elif product.stock <= product.min_stock %} <span style="color: #ffa500;">Low Stock</span>
+                        <span class="status-out">Out of Stock</span>
+                        {% elif product.stock <= product.min_stock %} <span class="status-low">Low Stock</span>
                             {% else %}
-                            <span style="color: #00ff00;">In Stock</span>
+                            <span class="status-good">In Stock</span>
                             {% endif %}
                     </td>
                 </tr>
@@ -339,7 +618,7 @@
         {% endif %}
     </div>
 
-    <!-- Money Inserted Breakdown -->
+    <!-- Money Inserted Details -->
     <div class="table-container">
         <h2>Money Inserted Details</h2>
         {% if recent_transactions %}
@@ -386,7 +665,7 @@
         {% endif %}
     </div>
 
-    <!-- Money Change Breakdown -->
+    <!-- Money Change Details -->
     <div class="table-container">
         <h2>Money Change Details</h2>
         {% if recent_transactions %}
@@ -395,16 +674,9 @@
                 <tr>
                     <th>Transaction ID</th>
                     <th>Type</th>
-                    <th>Rs 1</th>
-                    <th>Rs 5</th>
-                    <th>Rs 10</th>
-                    <th>Rs 20</th>
-                    <th>Rs 25</th>
-                    <th>Rs 50</th>
-                    <th>Rs 100</th>
-                    <th>Rs 200</th>
                     <th>Total Change</th>
                     <th>Products</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -416,70 +688,19 @@
                             {{ transaction.transaction_type|title }}
                         </span>
                     </td>
-                    <td>
-                        {% if transaction.change_details %}
-                        {{ transaction.change_details.change_rs1 }}
-                        {% else %}
-                        0
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if transaction.change_details %}
-                        {{ transaction.change_details.change_rs5 }}
-                        {% else %}
-                        0
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if transaction.change_details %}
-                        {{ transaction.change_details.change_rs10 }}
-                        {% else %}
-                        0
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if transaction.change_details %}
-                        {{ transaction.change_details.change_rs20 }}
-                        {% else %}
-                        0
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if transaction.change_details %}
-                        {{ transaction.change_details.change_rs25 }}
-                        {% else %}
-                        0
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if transaction.change_details %}
-                        {{ transaction.change_details.change_rs50 }}
-                        {% else %}
-                        0
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if transaction.change_details %}
-                        {{ transaction.change_details.change_rs100 }}
-                        {% else %}
-                        0
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if transaction.change_details %}
-                        {{ transaction.change_details.change_rs200 }}
-                        {% else %}
-                        0
-                        {% endif %}
-                    </td>
                     <td><strong>Rs {{ transaction.total_change|floatformat:2 }}</strong></td>
                     <td style="max-width: 150px;">
-                        {% if transaction.change_details and transaction.change_details.products_purchased %}
-                        {{ transaction.change_details.products_purchased|truncatewords:5 }}
-                        {% elif transaction.products_purchased %}
+                        {% if transaction.products_purchased %}
                         {{ transaction.products_purchased|truncatewords:5 }}
                         {% else %}
                         -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if transaction.total_change > 0 %}
+                        <span class="status-good">Change Given</span>
+                        {% else %}
+                        <span class="status-low">No Change</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -491,6 +712,8 @@
         {% endif %}
     </div>
 </div>
+
+<!-- POP-UP MODALS -->
 
 <!-- Add Product Modal -->
 <div id="addProductModal" class="modal">
