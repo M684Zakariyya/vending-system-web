@@ -65,11 +65,15 @@ if DATABASE_URL.startswith('postgres://'):
     DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=DATABASE_URL,
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
+    'default': {
+'ENGINE': 'django.db.backends.postgresql',
+'NAME' : 'railway',
+'USER' : 'postgres',
+'PASSWORD' : 'dVKNyGgZRCgOzaxvwoIWWkHTgzeHMQPT',
+'HOST' : 'trolley.proxy.rlwy.net',
+'PORT' : '57726',
+
+    }
 }
 
 # Password validation
