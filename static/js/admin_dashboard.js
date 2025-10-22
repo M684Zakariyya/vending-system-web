@@ -17,8 +17,47 @@ function testConnection() {
         });
 }
 
+// Enhanced CSRF Token Function
+function getCSRFToken() {
+    // Try to get from hidden field first
+    const csrfField = document.getElementById('csrf_token');
+    if (csrfField) {
+        console.log('CSRF token found in hidden field');
+        return csrfField.value;
+    }
+
+    // Try to get from form input
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput) {
+        console.log('CSRF token found in form input');
+        return csrfInput.value;
+    }
+
+    // Try to get from cookie
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                console.log('CSRF token found in cookie');
+                break;
+            }
+        }
+    }
+
+    if (!cookieValue) {
+        console.error('CSRF token not found!');
+    }
+
+    return cookieValue;
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log('Admin dashboard loaded');
+    console.log('CSRF Token available:', getCSRFToken() ? 'Yes' : 'No');
     testConnection();
     initializeProductManagement();
 });
@@ -304,32 +343,6 @@ function hideLoading() {
     if (loadingOverlay) {
         loadingOverlay.style.display = 'none';
     }
-}
-
-function getCSRFToken() {
-    // Try to get from cookie first
-    const name = 'csrftoken';
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-
-    // If not found in cookie, try to get from form input
-    if (!cookieValue) {
-        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (csrfInput) {
-            cookieValue = csrfInput.value;
-        }
-    }
-
-    return cookieValue;
 }
 
 function refreshDashboard() {

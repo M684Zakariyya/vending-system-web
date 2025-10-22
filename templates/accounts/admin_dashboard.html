@@ -2,7 +2,9 @@
 {% load static %}
 
 {% block content %}
+<!-- ADD CSRF TOKEN FOR JAVASCRIPT -->
 <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+
 <style>
     /* Scrollable modal styles */
     .modal-form-content {
@@ -47,6 +49,46 @@
         border-radius: 5px;
         margin: 1rem 0;
         color: #ffa500;
+    }
+
+    /* Dashboard specific styles */
+    .dashboard-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .management-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin: 1.5rem 0;
+    }
+
+    .products-grid,
+    .transactions-list {
+        display: grid;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .product-item,
+    .transaction-item {
+        padding: 1rem;
+        border: 1px solid rgba(0, 243, 255, 0.3);
+        border-radius: 5px;
     }
 </style>
 
@@ -120,7 +162,7 @@
         <h2>Top Selling Products</h2>
         <div class="products-grid">
             {% for item in top_products %}
-            <div class="product-item">
+            <div class="product-item cyber-border">
                 <strong>{{ item.product.name }}</strong>
                 <span>Rs {{ item.total_sold|floatformat:2 }}</span>
             </div>
@@ -135,7 +177,7 @@
         <h2>Recent Transactions</h2>
         <div class="transactions-list">
             {% for transaction in recent_transactions %}
-            <div class="transaction-item">
+            <div class="transaction-item cyber-border">
                 <div class="transaction-info">
                     <strong>ID: {{ transaction.transaction_id }}</strong>
                     <span>{{ transaction.date }} {{ transaction.time }}</span>
@@ -158,28 +200,33 @@
     <div class="all-products-section cyber-border">
         <h2>All Products</h2>
         <div class="products-table">
-            <table>
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Category</th>
+                        <th style="padding: 0.75rem; border-bottom: 2px solid var(--neon-blue);">ID</th>
+                        <th style="padding: 0.75rem; border-bottom: 2px solid var(--neon-blue);">Name</th>
+                        <th style="padding: 0.75rem; border-bottom: 2px solid var(--neon-blue);">Price</th>
+                        <th style="padding: 0.75rem; border-bottom: 2px solid var(--neon-blue);">Stock</th>
+                        <th style="padding: 0.75rem; border-bottom: 2px solid var(--neon-blue);">Category</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for product in all_products %}
                     <tr>
-                        <td>{{ product.product_id }}</td>
-                        <td>{{ product.name }}</td>
-                        <td>Rs {{ product.price }}</td>
-                        <td>{{ product.stock }}</td>
-                        <td>{{ product.category }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1);">{{
+                            product.product_id }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1);">{{ product.name }}
+                        </td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1);">Rs {{
+                            product.price }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1);">{{ product.stock
+                            }}</td>
+                        <td style="padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1);">{{
+                            product.category }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5">No products available</td>
+                        <td colspan="5" style="padding: 0.75rem; text-align: center;">No products available</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -262,6 +309,7 @@
                 </select>
             </div>
             <form id="updateProductForm" style="display: none;">
+                {% csrf_token %}
                 <input type="hidden" id="updateProductId" name="product_id">
                 <div class="form-group">
                     <label for="updateProductName">Product Name:</label>
