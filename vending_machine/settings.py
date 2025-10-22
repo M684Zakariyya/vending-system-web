@@ -15,6 +15,11 @@ ALLOWED_HOSTS = [
     '.onrender.com'
 ]
 
+# Add Render external hostname
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -58,7 +63,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'vending_machine.wsgi.application'
 
-# Database
+# Database configuration
 DATABASE_URL = config('DATABASE_URL', default='sqlite:///db.sqlite3')
 
 if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
@@ -70,17 +75,6 @@ DATABASES = {
         conn_max_age=600,
         ssl_require=not DEBUG
     )
-}
-DATABASES = {
-    'default': {
-'ENGINE': 'django.db.backends.postgresql',
-'NAME' : 'railway',
-'USER' : 'postgres',
-'PASSWORD' : 'dVKNyGgZRCgOzaxvwoIWWkHTgzeHMQPT',
-'HOST' : 'trolley.proxy.rlwy.net',
-'PORT' : '57726',
-
-    }
 }
 
 # Password validation
@@ -105,10 +99,11 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# Static files (CSS, JavaScript, Images) - FIXED
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')],
+    os.path.join(BASE_DIR, 'static'),
+]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files
@@ -128,6 +123,7 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # WhiteNoise configuration
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

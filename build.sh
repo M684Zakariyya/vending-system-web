@@ -4,13 +4,19 @@
 # Exit on error
 set -o errexit
 
+echo "Starting build process..."
+
 # Install dependencies
 echo "Installing dependencies..."
 pip install -r requirements.txt
 
 # Apply database migrations
 echo "Applying migrations..."
-python manage.py migrate
+python manage.py migrate --noinput
+
+# Collect static files first (this might help with the order)
+echo "Collecting static files..."
+python manage.py collectstatic --noinput --clear
 
 # Create superuser if doesn't exist (optional)
 echo "Creating superuser if needed..."
@@ -23,9 +29,5 @@ if not User.objects.filter(username='admin').exists():
 else:
     print('Superuser already exists')
 "
-
-# Collect static files
-echo "Collecting static files..."
-python manage.py collectstatic --noinput --clear
 
 echo "Build completed successfully!"
