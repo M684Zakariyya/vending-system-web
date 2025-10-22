@@ -12,6 +12,7 @@ function initializeProductManagement() {
     if (addProductForm) {
         addProductForm.addEventListener('submit', function (e) {
             e.preventDefault();
+            console.log('Add product form submitted');
             addNewProduct();
         });
     }
@@ -21,6 +22,7 @@ function initializeProductManagement() {
     if (updateProductForm) {
         updateProductForm.addEventListener('submit', function (e) {
             e.preventDefault();
+            console.log('Update product form submitted');
             updateExistingProduct();
         });
     }
@@ -46,7 +48,14 @@ function initializeProductManagement() {
 // Product Management Functions
 function showAddProduct() {
     console.log('Showing add product modal');
-    document.getElementById('addProductModal').style.display = 'block';
+    const modal = document.getElementById('addProductModal');
+    modal.style.display = 'block';
+
+    // Scroll to top of form
+    const formContent = modal.querySelector('.modal-form-content');
+    if (formContent) {
+        formContent.scrollTop = 0;
+    }
 }
 
 function hideAddProduct() {
@@ -56,7 +65,14 @@ function hideAddProduct() {
 
 function showUpdateProduct() {
     console.log('Showing update product modal');
-    document.getElementById('updateProductModal').style.display = 'block';
+    const modal = document.getElementById('updateProductModal');
+    modal.style.display = 'block';
+
+    // Scroll to top of form
+    const formContent = modal.querySelector('.modal-form-content');
+    if (formContent) {
+        formContent.scrollTop = 0;
+    }
 }
 
 function hideUpdateProduct() {
@@ -68,7 +84,14 @@ function hideUpdateProduct() {
 
 function showDeleteProduct() {
     console.log('Showing delete product modal');
-    document.getElementById('deleteProductModal').style.display = 'block';
+    const modal = document.getElementById('deleteProductModal');
+    modal.style.display = 'block';
+
+    // Scroll to top
+    const formContent = modal.querySelector('.modal-form-content');
+    if (formContent) {
+        formContent.scrollTop = 0;
+    }
 }
 
 function hideDeleteProduct() {
@@ -91,6 +114,12 @@ function loadProductData() {
         document.getElementById('updateProductMaxStock').value = selectedOption.getAttribute('data-max-stock');
         document.getElementById('updateProductMinStock').value = selectedOption.getAttribute('data-min-stock');
         document.getElementById('updateProductCategory').value = selectedOption.getAttribute('data-category');
+
+        // Scroll to form when product is selected
+        const formContent = document.querySelector('#updateProductModal .modal-form-content');
+        if (formContent) {
+            formContent.scrollTop = 0;
+        }
     } else {
         document.getElementById('updateProductForm').style.display = 'none';
     }
@@ -100,6 +129,8 @@ function addNewProduct() {
     const form = document.getElementById('addProductForm');
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
+
+    console.log('Adding new product:', data);
 
     // Validate form
     if (!validateProductForm(data)) {
@@ -117,12 +148,14 @@ function addNewProduct() {
         body: JSON.stringify(data)
     })
         .then(response => {
+            console.log('Response status:', response.status);
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Network response was not ok: ' + response.status);
             }
             return response.json();
         })
         .then(result => {
+            console.log('Add product result:', result);
             hideLoading();
             if (result.success) {
                 showNotification('Product added successfully!', 'success');
@@ -133,6 +166,7 @@ function addNewProduct() {
             }
         })
         .catch(error => {
+            console.error('Error adding product:', error);
             hideLoading();
             showNotification('Error adding product: ' + error.message, 'error');
         });
@@ -142,6 +176,8 @@ function updateExistingProduct() {
     const form = document.getElementById('updateProductForm');
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
+
+    console.log('Updating product:', data);
 
     // Validate form
     if (!validateProductForm(data)) {
@@ -159,12 +195,14 @@ function updateExistingProduct() {
         body: JSON.stringify(data)
     })
         .then(response => {
+            console.log('Response status:', response.status);
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Network response was not ok: ' + response.status);
             }
             return response.json();
         })
         .then(result => {
+            console.log('Update product result:', result);
             hideLoading();
             if (result.success) {
                 showNotification('Product updated successfully!', 'success');
@@ -175,6 +213,7 @@ function updateExistingProduct() {
             }
         })
         .catch(error => {
+            console.error('Error updating product:', error);
             hideLoading();
             showNotification('Error updating product: ' + error.message, 'error');
         });
@@ -188,6 +227,7 @@ function confirmDelete() {
         return;
     }
 
+    console.log('Deleting product:', productId);
     showLoading();
 
     fetch('/admin/delete-product/', {
@@ -199,12 +239,14 @@ function confirmDelete() {
         body: JSON.stringify({ product_id: productId })
     })
         .then(response => {
+            console.log('Response status:', response.status);
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Network response was not ok: ' + response.status);
             }
             return response.json();
         })
         .then(result => {
+            console.log('Delete product result:', result);
             hideLoading();
             if (result.success) {
                 showNotification('Product deleted successfully!', 'success');
@@ -215,6 +257,7 @@ function confirmDelete() {
             }
         })
         .catch(error => {
+            console.error('Error deleting product:', error);
             hideLoading();
             showNotification('Error deleting product: ' + error.message, 'error');
         });
@@ -222,17 +265,11 @@ function confirmDelete() {
 
 // Utility Functions
 function showLoading() {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    if (loadingOverlay) {
-        loadingOverlay.style.display = 'flex';
-    }
+    document.getElementById('loadingOverlay').style.display = 'flex';
 }
 
 function hideLoading() {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    if (loadingOverlay) {
-        loadingOverlay.style.display = 'none';
-    }
+    document.getElementById('loadingOverlay').style.display = 'none';
 }
 
 function getCSRFToken() {

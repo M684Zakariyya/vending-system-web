@@ -250,7 +250,7 @@ def process_payment(request):
     
     return JsonResponse({'success': False})
 
-# Admin product management functions
+# ADMIN PRODUCT MANAGEMENT FUNCTIONS
 @login_required
 @user_passes_test(is_admin)
 @csrf_exempt
@@ -258,6 +258,8 @@ def add_product(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            print("Received data:", data)
+            
             product_id = data.get('product_id')
             name = data.get('name')
             price = data.get('price')
@@ -274,6 +276,15 @@ def add_product(request):
             if Product.objects.filter(product_id=product_id).exists():
                 return JsonResponse({'success': False, 'message': 'Product ID already exists'})
             
+            # Convert to proper types
+            try:
+                price = float(price)
+                stock = int(stock)
+                max_stock = int(max_stock)
+                min_stock = int(min_stock)
+            except (ValueError, TypeError):
+                return JsonResponse({'success': False, 'message': 'Invalid number format'})
+            
             # Create new product
             product = Product.objects.create(
                 product_id=product_id,
@@ -285,9 +296,11 @@ def add_product(request):
                 category=category
             )
             
+            print(f"Product created: {product}")
             return JsonResponse({'success': True, 'message': 'Product added successfully'})
             
         except Exception as e:
+            print(f"Error adding product: {str(e)}")
             return JsonResponse({'success': False, 'message': str(e)})
     
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
@@ -299,6 +312,8 @@ def update_product(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            print("Update product data:", data)
+            
             product_id = data.get('product_id')
             
             if not product_id:
@@ -309,10 +324,16 @@ def update_product(request):
             
             # Update fields
             product.name = data.get('name', product.name)
-            product.price = data.get('price', product.price)
-            product.stock = data.get('stock', product.stock)
-            product.max_stock = data.get('max_stock', product.max_stock)
-            product.min_stock = data.get('min_stock', product.min_stock)
+            
+            # Convert numeric fields
+            try:
+                product.price = float(data.get('price', product.price))
+                product.stock = int(data.get('stock', product.stock))
+                product.max_stock = int(data.get('max_stock', product.max_stock))
+                product.min_stock = int(data.get('min_stock', product.min_stock))
+            except (ValueError, TypeError):
+                return JsonResponse({'success': False, 'message': 'Invalid number format'})
+            
             product.category = data.get('category', product.category)
             
             product.save()
@@ -320,6 +341,7 @@ def update_product(request):
             return JsonResponse({'success': True, 'message': 'Product updated successfully'})
             
         except Exception as e:
+            print(f"Error updating product: {str(e)}")
             return JsonResponse({'success': False, 'message': str(e)})
     
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
@@ -331,6 +353,8 @@ def delete_product(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            print("Delete product data:", data)
+            
             product_id = data.get('product_id')
             
             if not product_id:
@@ -338,11 +362,13 @@ def delete_product(request):
             
             # Get and delete product
             product = get_object_or_404(Product, product_id=product_id)
+            product_name = product.name
             product.delete()
             
-            return JsonResponse({'success': True, 'message': 'Product deleted successfully'})
+            return JsonResponse({'success': True, 'message': f'Product "{product_name}" deleted successfully'})
             
         except Exception as e:
+            print(f"Error deleting product: {str(e)}")
             return JsonResponse({'success': False, 'message': str(e)})
     
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
