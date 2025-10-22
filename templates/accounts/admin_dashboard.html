@@ -48,6 +48,121 @@
         margin: 1rem 0;
         color: #ffa500;
     }
+
+    /* Enhanced Table Styles */
+    .enhanced-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+    }
+
+    .enhanced-table th {
+        background: rgba(0, 243, 255, 0.1);
+        color: var(--neon-blue);
+        padding: 1rem 0.75rem;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 2px solid var(--neon-blue);
+        font-weight: bold;
+    }
+
+    .enhanced-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.9);
+        vertical-align: top;
+    }
+
+    .enhanced-table tr:hover {
+        background: rgba(0, 243, 255, 0.05);
+    }
+
+    .table-container {
+        background: var(--darker-bg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 243, 255, 0.3);
+        border-radius: 5px;
+    }
+
+    .table-container h3 {
+        color: var(--neon-pink);
+        margin-bottom: 1rem;
+        text-shadow: var(--text-glow);
+        border-bottom: 1px solid var(--neon-pink);
+        padding-bottom: 0.5rem;
+    }
+
+    .money-denomination {
+        display: inline-block;
+        background: rgba(0, 255, 0, 0.1);
+        border: 1px solid #00ff00;
+        padding: 0.25rem 0.5rem;
+        margin: 0.1rem;
+        border-radius: 3px;
+        font-size: 0.8rem;
+    }
+
+    .no-data {
+        text-align: center;
+        color: var(--neon-pink);
+        padding: 2rem;
+        font-style: italic;
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .product-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1rem;
+        border-radius: 5px;
+        border: 1px solid rgba(0, 243, 255, 0.2);
+    }
+
+    .product-item strong {
+        color: var(--neon-green);
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-item span {
+        color: var(--neon-blue);
+        font-weight: bold;
+    }
+
+    /* Transaction type badges */
+    .transaction-badge {
+        padding: 0.3rem 0.7rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .badge-purchase {
+        background: rgba(0, 255, 0, 0.2);
+        color: #00ff00;
+        border: 1px solid #00ff00;
+    }
+
+    .badge-withdrawal {
+        background: rgba(255, 165, 0, 0.2);
+        color: #ffa500;
+        border: 1px solid #ffa500;
+    }
+
+    .badge-refund {
+        background: rgba(255, 0, 0, 0.2);
+        color: #ff0000;
+        border: 1px solid #ff0000;
+    }
 </style>
 
 <!-- Loading Overlay -->
@@ -116,75 +231,264 @@
     </div>
 
     <!-- Top Products -->
-    <div class="top-products-section cyber-border">
+    <div class="table-container">
         <h2>Top Selling Products</h2>
-        <div class="products-grid">
+        {% if top_products %}
+        <div class="product-grid">
             {% for item in top_products %}
             <div class="product-item">
                 <strong>{{ item.product.name }}</strong>
                 <span>Rs {{ item.total_sold|floatformat:2 }}</span>
+                <div style="margin-top: 0.5rem; font-size: 0.8rem; color: rgba(255,255,255,0.7);">
+                    ID: {{ item.product.product_id }} | Stock: {{ item.product.stock }}
+                </div>
             </div>
-            {% empty %}
-            <p>No sales data available</p>
             {% endfor %}
         </div>
+        {% else %}
+        <div class="no-data">No sales data available</div>
+        {% endif %}
+    </div>
+
+    <!-- All Products Table -->
+    <div class="table-container">
+        <h2>All Products</h2>
+        {% if all_products %}
+        <table class="enhanced-table">
+            <thead>
+                <tr>
+                    <th style="width: 10%">ID</th>
+                    <th style="width: 25%">Name</th>
+                    <th style="width: 15%">Price</th>
+                    <th style="width: 10%">Stock</th>
+                    <th style="width: 10%">Max Stock</th>
+                    <th style="width: 10%">Min Stock</th>
+                    <th style="width: 10%">Category</th>
+                    <th style="width: 10%">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in all_products %}
+                <tr>
+                    <td><strong>{{ product.product_id }}</strong></td>
+                    <td>{{ product.name }}</td>
+                    <td>Rs {{ product.price }}</td>
+                    <td>{{ product.stock }}</td>
+                    <td>{{ product.max_stock }}</td>
+                    <td>{{ product.min_stock }}</td>
+                    <td>{{ product.category|title }}</td>
+                    <td>
+                        {% if product.stock == 0 %}
+                        <span style="color: #ff0000;">Out of Stock</span>
+                        {% elif product.stock <= product.min_stock %} <span style="color: #ffa500;">Low Stock</span>
+                            {% else %}
+                            <span style="color: #00ff00;">In Stock</span>
+                            {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">No products available</div>
+        {% endif %}
     </div>
 
     <!-- Recent Transactions -->
-    <div class="transactions-section cyber-border">
+    <div class="table-container">
         <h2>Recent Transactions</h2>
-        <div class="transactions-list">
-            {% for transaction in recent_transactions %}
-            <div class="transaction-item">
-                <div class="transaction-info">
-                    <strong>ID: {{ transaction.transaction_id }}</strong>
-                    <span>{{ transaction.date }} {{ transaction.time }}</span>
-                </div>
-                <div class="transaction-details">
-                    <span>Type: {{ transaction.transaction_type }}</span>
-                    <span>Amount: Rs {{ transaction.total_amount }}</span>
-                    {% if transaction.products_purchased %}
-                    <span>Products: {{ transaction.products_purchased }}</span>
-                    {% endif %}
-                </div>
-            </div>
-            {% empty %}
-            <p>No transactions available</p>
-            {% endfor %}
-        </div>
+        {% if recent_transactions %}
+        <table class="enhanced-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date & Time</th>
+                    <th>Type</th>
+                    <th>Total Amount</th>
+                    <th>Expenses</th>
+                    <th>Change</th>
+                    <th>Products</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in recent_transactions %}
+                <tr>
+                    <td><strong>{{ transaction.transaction_id }}</strong></td>
+                    <td>{{ transaction.date }} {{ transaction.time }}</td>
+                    <td>
+                        <span class="transaction-badge badge-{{ transaction.transaction_type }}">
+                            {{ transaction.transaction_type|title }}
+                        </span>
+                    </td>
+                    <td>Rs {{ transaction.total_amount|floatformat:2 }}</td>
+                    <td>Rs {{ transaction.total_expenses|floatformat:2 }}</td>
+                    <td>Rs {{ transaction.total_change|floatformat:2 }}</td>
+                    <td style="max-width: 200px;">
+                        {% if transaction.products_purchased %}
+                        {{ transaction.products_purchased|truncatewords:10 }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">No transactions available</div>
+        {% endif %}
     </div>
 
-    <!-- All Products -->
-    <div class="all-products-section cyber-border">
-        <h2>All Products</h2>
-        <div class="products-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Category</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for product in all_products %}
-                    <tr>
-                        <td>{{ product.product_id }}</td>
-                        <td>{{ product.name }}</td>
-                        <td>Rs {{ product.price }}</td>
-                        <td>{{ product.stock }}</td>
-                        <td>{{ product.category }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5">No products available</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <!-- Money Inserted Breakdown -->
+    <div class="table-container">
+        <h2>Money Inserted Details</h2>
+        {% if recent_transactions %}
+        <table class="enhanced-table">
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Type</th>
+                    <th>Rs 1</th>
+                    <th>Rs 5</th>
+                    <th>Rs 10</th>
+                    <th>Rs 20</th>
+                    <th>Rs 25</th>
+                    <th>Rs 50</th>
+                    <th>Rs 100</th>
+                    <th>Rs 200</th>
+                    <th>Total Inserted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in recent_transactions %}
+                <tr>
+                    <td><strong>{{ transaction.transaction_id }}</strong></td>
+                    <td>
+                        <span class="transaction-badge badge-{{ transaction.transaction_type }}">
+                            {{ transaction.transaction_type|title }}
+                        </span>
+                    </td>
+                    <td>{{ transaction.rs1 }}</td>
+                    <td>{{ transaction.rs5 }}</td>
+                    <td>{{ transaction.rs10 }}</td>
+                    <td>{{ transaction.rs20 }}</td>
+                    <td>{{ transaction.rs25 }}</td>
+                    <td>{{ transaction.rs50 }}</td>
+                    <td>{{ transaction.rs100 }}</td>
+                    <td>{{ transaction.rs200 }}</td>
+                    <td><strong>Rs {{ transaction.total_amount|floatformat:2 }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">No money insertion data available</div>
+        {% endif %}
+    </div>
+
+    <!-- Money Change Breakdown -->
+    <div class="table-container">
+        <h2>Money Change Details</h2>
+        {% if recent_transactions %}
+        <table class="enhanced-table">
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Type</th>
+                    <th>Rs 1</th>
+                    <th>Rs 5</th>
+                    <th>Rs 10</th>
+                    <th>Rs 20</th>
+                    <th>Rs 25</th>
+                    <th>Rs 50</th>
+                    <th>Rs 100</th>
+                    <th>Rs 200</th>
+                    <th>Total Change</th>
+                    <th>Products</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in recent_transactions %}
+                <tr>
+                    <td><strong>{{ transaction.transaction_id }}</strong></td>
+                    <td>
+                        <span class="transaction-badge badge-{{ transaction.transaction_type }}">
+                            {{ transaction.transaction_type|title }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if transaction.change_details %}
+                        {{ transaction.change_details.change_rs1 }}
+                        {% else %}
+                        0
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if transaction.change_details %}
+                        {{ transaction.change_details.change_rs5 }}
+                        {% else %}
+                        0
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if transaction.change_details %}
+                        {{ transaction.change_details.change_rs10 }}
+                        {% else %}
+                        0
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if transaction.change_details %}
+                        {{ transaction.change_details.change_rs20 }}
+                        {% else %}
+                        0
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if transaction.change_details %}
+                        {{ transaction.change_details.change_rs25 }}
+                        {% else %}
+                        0
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if transaction.change_details %}
+                        {{ transaction.change_details.change_rs50 }}
+                        {% else %}
+                        0
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if transaction.change_details %}
+                        {{ transaction.change_details.change_rs100 }}
+                        {% else %}
+                        0
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if transaction.change_details %}
+                        {{ transaction.change_details.change_rs200 }}
+                        {% else %}
+                        0
+                        {% endif %}
+                    </td>
+                    <td><strong>Rs {{ transaction.total_change|floatformat:2 }}</strong></td>
+                    <td style="max-width: 150px;">
+                        {% if transaction.change_details and transaction.change_details.products_purchased %}
+                        {{ transaction.change_details.products_purchased|truncatewords:5 }}
+                        {% elif transaction.products_purchased %}
+                        {{ transaction.products_purchased|truncatewords:5 }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">No money change data available</div>
+        {% endif %}
     </div>
 </div>
 
