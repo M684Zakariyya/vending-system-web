@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction as db_transaction
 import json
-from .models import Product, Cart, Transaction
+from .models import Product, Cart, MoneyInsertion
 
 def is_admin(user):
     return user.is_authenticated and user.is_staff
@@ -55,7 +55,7 @@ def withdraw_money(request):
             return JsonResponse({'success': False, 'message': 'No money to withdraw'})
         
         try:
-            transaction_obj = Transaction.objects.create(
+            transaction_obj = MoneyInsertion.objects.create(
                 total_amount=total_money,
                 total_expenses=0,
                 total_change=total_money,
@@ -213,7 +213,7 @@ def process_payment(request):
                     purchased_products.append(f"{product.name} x{item.quantity}")
 
                 # Create PURCHASE transaction
-                transaction_obj = Transaction.objects.create(
+                transaction_obj = MoneyInsertion.objects.create(
                     total_amount=money_inserted,
                     total_expenses=total_cost,
                     total_change=money_inserted - total_cost,

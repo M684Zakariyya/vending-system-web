@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 import json
 from django.http import JsonResponse
-from vm_app.models import Product, Transaction
+from vm_app.models import Product, MoneyInsertion
 from django.db.models import Sum, Count, F
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -40,17 +40,17 @@ def admin_dashboard(request):
     month_ago = today - timedelta(days=30)
     
     # Only count purchase transactions for sales overview
-    daily_sales = Transaction.objects.filter(date=today, transaction_type='purchase').aggregate(
+    daily_sales = MoneyInsertion.objects.filter(date=today, transaction_type='purchase').aggregate(
         total_sales=Sum('total_expenses'),
         total_transactions=Count('transaction_id')
     )
     
-    weekly_sales = Transaction.objects.filter(date__gte=week_ago, transaction_type='purchase').aggregate(
+    weekly_sales = MoneyInsertion.objects.filter(date__gte=week_ago, transaction_type='purchase').aggregate(
         total_sales=Sum('total_expenses'),
         total_transactions=Count('transaction_id')
     )
     
-    monthly_sales = Transaction.objects.filter(date__gte=month_ago, transaction_type='purchase').aggregate(
+    monthly_sales = MoneyInsertion.objects.filter(date__gte=month_ago, transaction_type='purchase').aggregate(
         total_sales=Sum('total_expenses'),
         total_transactions=Count('transaction_id')
     )
@@ -79,7 +79,7 @@ def admin_dashboard(request):
     top_products = sorted(top_products, key=lambda x: x['total_sold'], reverse=True)[:5]
     
     # Recent transactions - show ALL transactions (purchases and withdrawals)
-    recent_transactions = Transaction.objects.all().order_by('-date', '-time')[:20]  # Limit to 20
+    recent_transactions = MoneyInsertion.objects.all().order_by('-date', '-time')[:20]  # Limit to 20
     
     # All products for management
     all_products_list = Product.objects.all().order_by('product_id')
