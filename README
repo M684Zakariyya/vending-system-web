@@ -1,0 +1,5 @@
+The Vending System Web Application is a web-based implementation of a vending machine system designed to provide persistent data management and remote accessibility. It allows users to interact with the system through a browser interface 
+where products can be selected, purchases can be processed, and transactions are stored in a database.
+
+This project introduces backend integration and database connectivity to ensure persistent storage of product and transaction data. It demonstrates foundational full-stack development concepts by combining frontend interaction with 
+backend logic and database management in a structured web application.
